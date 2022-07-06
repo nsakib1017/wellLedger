@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DGFI Central Database Login</title>
+    <link rel="stylesheet" type="text/css" href="../css/style.css" media="all" />
+    <link rel="stylesheet" type="text/css" href="../css/auth.css">
+    <link rel="stylesheet" type="text/css" href="../css/sign-in.css">
+</head>
+<body>
+<div class="login-page">
+    <div class="form">
+<!--        action="/auth/api/sign-in-->
+<!--        enctype="multipart/form-data"-->
+        <form class="login-form"  method="post" action="/login" >
+            <input id="username" name="username" type="text" placeholder="User ID"/>
+            <input id="password" name="password" type="password" placeholder="Password"/>
+            <button>login</button>
+        </form>
+    </div>
+</div>
+<script type="text/javascript" src="/js/auth.js"></script>
+<script type="text/javascript" src="/js/sign-in.js"></script>
+</body>
+</html>

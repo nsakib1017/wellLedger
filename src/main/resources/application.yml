@@ -1,0 +1,51 @@
+application:
+  title: ${name}
+  version: ${version}
+  validate-mac: false
+spring:
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:postgresql://localhost:5432/healthLedger
+    username: birdeye
+    password: birdeye
+    initialization-mode: always
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "dashboard.birdeye@gmail.com"
+    password: "Aa123456$"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+          starttls:
+            enable: true
+            socketFactory:
+              class: "javax.net.ssl.SSLSocketFactory"
+  jpa:
+    open-in-view:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: com.subsel.healthledger.common.model.CustomPostgresDialect
+  liquibase:
+    changeLog: "classpath:db/migration/liquibase-changelog.yml"
+
+
+server:
+  port: 8080
+  servlet:
+    session:
+      timeout: 300s
+token:
+  secret: "{bcrypt}$donald"
+  expire: 180000
+
+agent:
+  auth-url: "https://test-accounts.priyo.com"

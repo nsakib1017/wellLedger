@@ -1,0 +1,11 @@
+body
+{
+    background: #6a1b9a; /* fallback for old browsers */
+    /*background: -webkit-linear-gradient(right, #345c1e, #8DC26F);*/
+    /*background: -moz-linear-gradient(right, #345c1e, #8DC26F);*/
+    /*background: -o-linear-gradient(right, #345c1e, #8DC26F);*/
+    /*background: linear-gradient(to left, #345c1e, #8DC26F);*/
+    font-family: "Roboto", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}

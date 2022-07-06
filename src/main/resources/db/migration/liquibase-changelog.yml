@@ -1,0 +1,3 @@
+databaseChangeLog:
+- include:
+    file: db/migration/changes/v1__auto_20220707_0124.sql

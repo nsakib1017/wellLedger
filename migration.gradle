@@ -1,0 +1,95 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'org.yaml:snakeyaml:1.25'
+    }
+}
+
+import org.yaml.snakeyaml.DumperOptions
+import org.yaml.snakeyaml.Yaml
+
+import java.text.SimpleDateFormat
+
+def MIGRATION_CHANGES_DIR = "$projectDir/src/main/resources/db/migration/changes/"
+
+def extractVersion = { filename -> filename.split("__").first().substring(1).toFloat().toInteger() }
+
+def createMigrationFile = { version, migrationId, username ->
+    def migrationFile = new File(MIGRATION_CHANGES_DIR, "v${version}__${migrationId}.sql")
+    migrationFile.text = """--liquibase formatted sql
+
+--changeset ${username}:${migrationId}	
+--Add your migrations from here
+------------------------------------------------
+
+"""
+    return migrationFile
+}
+
+def relativize = { fullPath, base ->
+    new File(base).toURI().relativize(new File(fullPath).toURI()).getPath()
+}
+def createInclude = { newFile ->
+    LinkedHashMap file = new LinkedHashMap()
+    file.put('file', relativize(newFile.getAbsolutePath(), "$projectDir/src/main/resources/"))
+    LinkedHashMap include = new LinkedHashMap()
+    include.put('include', file)
+    return include
+}
+
+def includeNewMigration = { changeLog, newFile ->
+    if (changeLog.databaseChangeLog == null) {
+        changeLog.databaseChangeLog = new ArrayList<>()
+    }
+    def dbChangeLog = changeLog.databaseChangeLog
+    // New Include
+    def include = createInclude(newFile)
+    dbChangeLog.add(include)
+}
+
+def getVersion = {
+    def previousMigrations = layout.files { file(MIGRATION_CHANGES_DIR).listFiles() }.collect { it.name }
+            .sort { a, b -> extractVersion(a) <=> extractVersion(b) }
+    if (previousMigrations.isEmpty()) {
+        return 1
+    } else {
+        def lastMigration = previousMigrations.last()
+        return extractVersion(lastMigration) + 1
+    }
+}
+
+def getUsername = {
+    def username = "git config --get \"user.name\"".execute().text.trim()
+    return !username.empty ? username : "dev"
+}
+
+task createMigration {
+    def time = new SimpleDateFormat("yyyyMMdd_HHmm").format(new Date())
+    def migrationName = project.hasProperty('migrationName') ? migrationName : "auto"
+    println migrationName
+    def migrationId = "${migrationName}_${time}"
+
+    doLast {
+        println 'Creating new migration'
+        def version = getVersion()
+        def username = getUsername()
+        println("$version, $migrationId, $username")
+        def migrationFile = createMigrationFile(version, migrationId, username)
+        println "${relativize(migrationFile.getAbsolutePath(), "$projectDir/src/main/resources/")}"
+        def masterChangeLog = "$projectDir/src/main/resources/db/migration/liquibase-changelog.yml"
+
+        DumperOptions options = new DumperOptions()
+        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)
+        options.setPrettyFlow(true)
+        Yaml yaml = new Yaml(options)
+
+        def changeLog = yaml.load(new File(masterChangeLog).newInputStream())
+        includeNewMigration(changeLog, migrationFile)
+        FileWriter writer = new FileWriter(masterChangeLog)
+        yaml.dump(changeLog, writer)
+    }
+}

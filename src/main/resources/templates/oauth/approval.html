@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>PASs - Priyo Auth System</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../css/style.css" media="all" />
+    <link rel="stylesheet" type="text/css" href="../css/auth.css">
+    <link rel="stylesheet" type="text/css" href="../css/sign-in.css">
+
+</head>
+<body>
+<div class="approval page">
+    <h1>Please Confirm</h1>
+    <p>
+        Do you authorize <span th:text="${session.authorizationRequest.clientId}" th:unless="${session == null}">[...]</span> at <span th:text="${session.authorizationRequest.redirectUri}" th:unless="${session == null}">[...]</span> to access your protected resources?
+    </p>
+    <form id="confirmationForm" name="confirmationForm" action="/oauth/authorize" method="post">
+        <input name="user_oauth_approval" value="true" type="hidden"/>
+<!--        <div class="form-group" th:each="scope : ${session.authorizationRequest.scope}">-->
+<!--            <input type="checkbox" th:name="'scope.'+${scope.name}" value="true"><span th:text="${scope.description}"/>-->
+<!--        </div>-->
+        <div class="form-group">
+            <input type="checkbox" name="scope.user:profile" value="true"> Basic Profile
+        </div>
+
+        <label><input name="authorize" value="Authorize" type="submit"/></label>
+    </form>
+</div>
+</body>
+</html>
