@@ -10,22 +10,6 @@ spring:
     username: birdeye
     password: birdeye
     initialization-mode: always
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: "dashboard.birdeye@gmail.com"
-    password: "Aa123456$"
-    properties:
-      mail:
-        smtp:
-          auth: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
-          starttls:
-            enable: true
-            socketFactory:
-              class: "javax.net.ssl.SSLSocketFactory"
   jpa:
     open-in-view:
     show-sql: false
@@ -46,6 +30,3 @@ server:
 token:
   secret: "{bcrypt}$donald"
   expire: 180000
-
-agent:
-  auth-url: "https://test-accounts.priyo.com"
