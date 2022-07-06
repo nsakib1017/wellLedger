@@ -1,0 +1,12 @@
+.gradle/
+.idea/
+bin/
+build/
+gradle/
+gradlew
+gradlew.bat
+src/main/resources/application-dev.yml
+.env
+logs/
+.DS_Store
+
