@@ -9,4 +9,5 @@ src/main/resources/application-dev.yml
 .env
 logs/
 .DS_Store
+wallet/*
 
