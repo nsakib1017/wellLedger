@@ -2,6 +2,10 @@ plugins {
     id 'org.springframework.boot' version '2.2.2.RELEASE'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '5.1.0'
+    id 'application'
+    id 'checkstyle'
+    id 'jacoco'
 }
 
 apply from: 'migration.gradle'
@@ -9,6 +13,9 @@ apply from: 'migration.gradle'
 repositories {
     mavenCentral()
     jcenter()
+    maven {
+        url 'https://jitpack.io'
+    }
 }
 
 dependencies {
@@ -47,6 +54,14 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     implementation 'org.hyperledger.fabric:fabric-gateway-java:2.2.0'
+    implementation 'io.grpc:grpc-netty-shaded:1.47.0'
+    implementation 'com.google.code.gson:gson:2.9.0'
+    compileOnly 'org.hyperledger.fabric-chaincode-java:fabric-chaincode-shim:2.+'
+    implementation 'org.hyperledger.fabric-chaincode-java:fabric-chaincode-shim:2.+'
+    implementation 'org.junit.jupiter:junit-jupiter:5.4.2'
+    implementation 'org.assertj:assertj-core:3.11.1'
+    implementation 'org.mockito:mockito-core:2.+'
+
 }
 
 test {

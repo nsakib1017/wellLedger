@@ -3,7 +3,7 @@ Copyright IBM Corp., DTCC All Rights Reserved.
 
 SPDX-License-Identifier: Apache-2.0
 */
-package org.hyperledger.fabric_samples;
+package com.subsel.healthledger.fabricNetwork.chaincode.abstore.java.src.main.java.org.hyperledger.fabric;
 
 import java.util.List;
 

@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.subsel.healthledger.util.Constants;
 
 
 import java.nio.file.Path;
@@ -34,14 +35,14 @@ public class WalletController {
         // Create a CA client for interacting with the CA.
         Properties props = new Properties();
         props.put("pemFile",
-                "../../test-network/organizations/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem");
+                String.format("%s/org1.example.com/ca/ca.org1.example.com-cert.pem",Constants.pathToTestNetwork));
         props.put("allowAllHostNames", "true");
         HFCAClient caClient = HFCAClient.createNewInstance("https://localhost:7054", props);
         CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();
         caClient.setCryptoSuite(cryptoSuite);
 
         // Create a wallet for managing identities
-        Wallet wallet = Wallets.newFileSystemWallet(Paths.get("..","wallet"));
+        Wallet wallet = Wallets.newFileSystemWallet(Paths.get("wallet"));
 
         // Check to see if we've already enrolled the admin user.
         if (wallet.get("admin") != null) {
@@ -67,14 +68,14 @@ public class WalletController {
         // Create a CA client for interacting with the CA.
         Properties props = new Properties();
         props.put("pemFile",
-                "../../test-network/organizations/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem");
+                String.format("%s/org1.example.com/ca/ca.org1.example.com-cert.pem", Constants.pathToTestNetwork));
         props.put("allowAllHostNames", "true");
         HFCAClient caClient = HFCAClient.createNewInstance("https://localhost:7054", props);
         CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();
         caClient.setCryptoSuite(cryptoSuite);
 
         // Create a wallet for managing identities
-        Wallet wallet = Wallets.newFileSystemWallet(Paths.get("..","wallet"));
+        Wallet wallet = Wallets.newFileSystemWallet(Paths.get("wallet"));
 
         // Check to see if we've already enrolled the user.
         if (wallet.get("appUser") != null) {
@@ -151,10 +152,10 @@ public class WalletController {
     @GetMapping(value = "/testChainCode", produces = "application/json")
     public ResponseEntity<Map<String, Object>> testChainCode() throws Exception {
         // Load a file system based wallet for managing identities.
-        Path walletPath = Paths.get("..","wallet");
+        Path walletPath = Paths.get("wallet");
         Wallet wallet = Wallets.newFileSystemWallet(walletPath);
         // load a CCP
-        Path networkConfigPath = Paths.get("..", "..", "test-network", "organizations", "peerOrganizations", "org1.example.com", "connection-org1.yaml");
+        Path networkConfigPath = Paths.get("/Users/nsakibpriyo/go/src/github.com/nsakib1017/fabric-samples/fabcar/java/healthledger-2/src/main/java/com/subsel/healthledger/fabricNetwork/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.yaml");
 
         Gateway.Builder builder = Gateway.createBuilder();
         builder.identity(wallet, "appUser").networkConfig(networkConfigPath).discovery(true);
@@ -171,18 +172,18 @@ public class WalletController {
             byte[] result;
 
             result = contract.evaluateTransaction("queryAllCars");
-            queryResults.put("queryAllCars", result);
+            queryResults.put("queryAllCars", new String(result));
 
             contract.submitTransaction("createCar", "CAR10", "VW", "Polo", "Grey", "Mary");
 
             result = contract.evaluateTransaction("queryCar", "CAR10");
-            queryResults.put("queryCar", result);
+            queryResults.put("queryCar", new String(result));
 
 
             contract.submitTransaction("changeCarOwner", "CAR10", "Archie");
 
             result = contract.evaluateTransaction("queryCar", "CAR10");
-            queryResults.put("queryCar", result);
+            queryResults.put("queryCar", new String(result));
 
             HttpHeaders headers = new HttpHeaders();
             return new ResponseEntity<Map<String, Object>>(queryResults, headers, HttpStatus.OK);
