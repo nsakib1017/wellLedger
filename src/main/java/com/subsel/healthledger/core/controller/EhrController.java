@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.subsel.healthledger.common.controller.BaseController;
 import com.subsel.healthledger.core.model.EhrPOJO;
+import com.subsel.healthledger.core.model.TicketPojo;
+import com.subsel.healthledger.util.TxnIdGeneretaror;
 import org.hyperledger.fabric.gateway.*;
 
 import org.springframework.http.HttpHeaders;
@@ -14,12 +16,45 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/api/ehr")
 public class EhrController extends BaseController {
+
+    @PostMapping(value = "/", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<Map<String, Object>> createEhr(@PathVariable String id, @RequestBody EhrPOJO ehrPOJO) throws Exception {
+
+        String ehrId = TxnIdGeneretaror.generate();
+        String issued = String.valueOf(new Date().getTime());
+
+        // Load a file system based wallet for managing identities.
+        Path walletPath = Paths.get("wallet");
+        Wallet wallet = Wallets.newFileSystemWallet(walletPath);
+        // load a CCP
+        Path networkConfigPath = Paths.get("/Users/nsakibpriyo/go/src/github.com/nsakib1017/fabric-samples/fabcar/java/healthledger-2/src/main/java/com/subsel/healthledger/fabricnetwork/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.yaml");
+
+        Gateway.Builder builder = Gateway.createBuilder();
+        builder.identity(wallet, ehrPOJO.getUname()).networkConfig(networkConfigPath).discovery(true);
+
+        Map<String, Object> queryResults = new HashMap<String, Object>();
+
+        // create a gateway connection
+        try (Gateway gateway = builder.connect()) {
+
+            // get the network and contract
+            Network network = gateway.getNetwork("mychannel");
+            Contract contract = network.getContract("fabcar");
+
+            contract.evaluateTransaction("CreateEhr", ehrId, ehrId, ehrPOJO.getUname(), "ehr", "QmHash##", issued, "N/A");
+            queryResults.put("ehrData", ehrId);
+
+            HttpHeaders headers = new HttpHeaders();
+            return new ResponseEntity<Map<String, Object>>(queryResults, headers, HttpStatus.CREATED);
+        }
+    }
 
     @GetMapping(value = "/", produces = "application/json")
     public ResponseEntity<Map<String, Object>> getAllEhr(@RequestBody EhrPOJO ehrPOJO) throws Exception {

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.subsel.healthledger.common.controller.BaseController;
-import com.subsel.healthledger.core.model.ExtendTimeLimitPOJO;
+import com.subsel.healthledger.core.model.EhrPOJO;
+import com.subsel.healthledger.core.model.TicketPojo;
+import com.subsel.healthledger.util.TxnIdGeneretaror;
 import org.hyperledger.fabric.gateway.*;
 
 import org.springframework.http.HttpHeaders;
@@ -20,8 +22,42 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/permissions")
+@RequestMapping("/api/ticket")
 public class PermissionController extends BaseController {
+
+    @PostMapping(value = "/", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<Map<String, Object>> createToken(@PathVariable String id, @RequestBody TicketPojo ticketPojo) throws Exception {
+
+        String pointer = TxnIdGeneretaror.generate();
+        long issued = new Date().getTime();
+        // Maturity in milisecond
+        long maturity = 60 * 1000 * Long.parseLong(ticketPojo.getLimit());
+
+        // Load a file system based wallet for managing identities.
+        Path walletPath = Paths.get("wallet");
+        Wallet wallet = Wallets.newFileSystemWallet(walletPath);
+        // load a CCP
+        Path networkConfigPath = Paths.get("/Users/nsakibpriyo/go/src/github.com/nsakib1017/fabric-samples/fabcar/java/healthledger-2/src/main/java/com/subsel/healthledger/fabricnetwork/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.yaml");
+
+        Gateway.Builder builder = Gateway.createBuilder();
+        builder.identity(wallet, ticketPojo.getUname()).networkConfig(networkConfigPath).discovery(true);
+
+        Map<String, Object> queryResults = new HashMap<String, Object>();
+
+        // create a gateway connection
+        try (Gateway gateway = builder.connect()) {
+
+            // get the network and contract
+            Network network = gateway.getNetwork("mychannel");
+            Contract contract = network.getContract("fabcar");
+
+            contract.evaluateTransaction("CreateEhr", pointer, ticketPojo.getKey(), ticketPojo.getUname(), "permission", "yes", String.valueOf(issued), String.valueOf(maturity));
+            queryResults.put("ticket", pointer);
+
+            HttpHeaders headers = new HttpHeaders();
+            return new ResponseEntity<Map<String, Object>>(queryResults, headers, HttpStatus.CREATED);
+        }
+    }
 
     @PostMapping(value = "/revoke/{id}", produces = "application/json", consumes = "application/json")
     public ResponseEntity<Map<String, Object>> revokePermission(@PathVariable String id) throws IOException, ContractException {
@@ -52,7 +88,7 @@ public class PermissionController extends BaseController {
     }
 
     @PostMapping(value = "/extend/{id}", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<Map<String, Object>> extendPermission(@PathVariable String id, @RequestBody ExtendTimeLimitPOJO extendTimeLimitPOJO) throws IOException, ContractException {
+    public ResponseEntity<Map<String, Object>> extendPermission(@PathVariable String id, @RequestBody TicketPojo extendTimeLimitPOJO) throws IOException, ContractException {
         Map<String, Object> response = new HashMap<>();
         HttpHeaders httpHeaders = new HttpHeaders();
 
