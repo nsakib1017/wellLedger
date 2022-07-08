@@ -4,10 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hyperledger.fabric.gateway.*;
+import org.springframework.security.crypto.codec.Hex;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,13 +68,22 @@ public class FabricUtils {
         return connectionPath;
     }
 
-    public static Map<String, Object> contractFactory(Gateway gateway, String contractStringValue, Map<String, Object> requestResult) throws ContractException, JsonProcessingException {
+    public static String getPasswordDigest (String password) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hash = digest.digest(
+                password.getBytes(StandardCharsets.UTF_8));
+        return new String(Hex.encode(hash));
+    }
+
+    public static Map<String, Object> contractFactory(Gateway gateway, String contractStringValue, Map<String, Object> requestResult) throws Exception {
 
         Network network = gateway.getNetwork(FabricNetworkConstants.wallet);
         Contract contract = network.getContract(FabricNetworkConstants.contractName);
 
         Map<String, Object> response = new HashMap<>();
         byte[] result;
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode actualObj;
         ContractName contractName = ContractName.valueOf(contractStringValue);
 
         switch (contractName){
@@ -80,30 +92,77 @@ public class FabricUtils {
                         contractName.toString(),
                         requestResult.get("username").toString(),
                         requestResult.get("certificate").toString(),
-                        requestResult.get("password").toString(),
+                        getPasswordDigest(requestResult.get("password").toString()),
                         requestResult.get("mspId").toString()
                 );
                 response.put("message", "User registered");
-
                 break;
+
             case Login:
                 result = contract.evaluateTransaction(
                         contractName.toString(),
                         requestResult.get("username").toString(),
-                        requestResult.get("password").toString()
+                        getPasswordDigest(requestResult.get("password").toString())
                 );
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode actualObj = mapper.readTree(new String(result));
+                actualObj = mapper.readTree(new String(result));
                 if (!actualObj.get("username").isEmpty())
                     response.put("message", "Login Successful");
                 else
                     response.put("message", "Login Failed");
                 break;
+
+            case CreateEhr:
+                 contract.evaluateTransaction(
+                        contractName.toString(),
+                        requestResult.get("pointer").toString(),
+                        requestResult.get("key").toString(),
+                        requestResult.get("username").toString(),
+                        requestResult.get("type").toString(),
+                        requestResult.get("data").toString(),
+                        requestResult.get("issued").toString(),
+                        requestResult.get("maturity").toString()
+                );
+                response.put("ehrData", requestResult.get("pointer").toString());
+                break;
+
+            case GetAllEhr:
+                result = contract.evaluateTransaction(
+                        contractName.toString(),
+                        requestResult.get("username").toString()
+                );
+                actualObj = mapper.readTree(new String(result));
+                response.put("results", actualObj);
+                break;
+
+            case ReadEhr:
+                result = contract.evaluateTransaction(
+                        contractName.toString(),
+                        requestResult.get("id").toString()
+                );
+                actualObj = mapper.readTree(new String(result));
+                response.put("results", actualObj);
+                break;
+
+            case ChangeData:
+                contract.evaluateTransaction(
+                        contractName.toString(),
+                        requestResult.get("id").toString(),
+                        requestResult.get("data").toString());
+                response.put("message", "Permission revoked!!");
+                break;
+
+            case ExtendLimit:
+                contract.evaluateTransaction(
+                        contractName.toString(),
+                        requestResult.get("id").toString(),
+                        requestResult.get("maturity").toString());
+                response.put("message", "Permission extended!!");
+                break;
+
             default:
                 response.put("message", "Invalid contract");
         }
         return response;
     }
-
 
 }

@@ -46,6 +46,14 @@ public class EhrController extends BaseController {
             // get the network and contract
             Network network = gateway.getNetwork("mychannel");
             Contract contract = network.getContract("fabcar");
+            Map<String, String> requestBody = new HashMap<>();
+            requestBody.put("pointer", ehrId);
+            requestBody.put("key", ehrId);
+            requestBody.put("username", ehrPOJO.getUname());
+            requestBody.put("type", "ehr");
+            requestBody.put("data", "QmHash##");
+            requestBody.put("issued", issued);
+            requestBody.put("maturity", "N/A");
 
             contract.evaluateTransaction("CreateEhr", ehrId, ehrId, ehrPOJO.getUname(), "ehr", "QmHash##", issued, "N/A");
             queryResults.put("ehrData", ehrId);
