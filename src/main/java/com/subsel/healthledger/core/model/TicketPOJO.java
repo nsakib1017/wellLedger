@@ -3,7 +3,7 @@ package com.subsel.healthledger.core.model;
 import lombok.Data;
 
 @Data
-public class TicketPojo {
+public class TicketPOJO {
     private final String limit;
     private final String uname;
     private final String key;

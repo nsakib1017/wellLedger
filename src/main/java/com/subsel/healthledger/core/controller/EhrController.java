@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.subsel.healthledger.common.controller.BaseController;
 import com.subsel.healthledger.core.model.EhrPOJO;
-import com.subsel.healthledger.core.model.TicketPojo;
 import com.subsel.healthledger.util.TxnIdGeneretaror;
 import org.hyperledger.fabric.gateway.*;
 
