@@ -1,6 +1,5 @@
 package com.subsel.healthledger.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hyperledger.fabric.gateway.*;
@@ -61,6 +60,22 @@ public class FabricUtils {
                 break;
             case Org2MSP:
                 connectionPath = FabricNetworkConstants.org2ConnectionYAML;
+                break;
+            default:
+                connectionPath = "";
+        }
+        return connectionPath;
+    }
+
+    public static String getNetworkConfigCertPath(String orgMsp) {
+        OrgMsp resultOrgMsp = OrgMsp.valueOf(orgMsp);
+        String connectionPath;
+        switch (resultOrgMsp) {
+            case Org1MSP:
+                connectionPath = FabricNetworkConstants.pathToOrg1TestNetwork;
+                break;
+            case Org2MSP:
+                connectionPath = FabricNetworkConstants.pathToOrg2TestNetwork;
                 break;
             default:
                 connectionPath = "";

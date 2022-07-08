@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.subsel.healthledger.common.controller.BaseController;
 import com.subsel.healthledger.core.model.UserPOJO;
 import com.subsel.healthledger.util.FabricNetworkConstants;
+import com.subsel.healthledger.util.FabricUtils;
 import okhttp3.Request;
 import org.hyperledger.fabric.gateway.*;
 
@@ -42,18 +43,17 @@ public class UserController extends BaseController {
         HttpHeaders httpHeaders = new HttpHeaders();
 
         Properties props = new Properties();
-        props.put("pemFile",
-                String.format("%s/org1.example.com/ca/ca.org1.example.com-cert.pem", FabricNetworkConstants.pathToTestNetwork));
+        props.put("pemFile", FabricUtils.getNetworkConfigCertPath(userPOJO.getMspOrg()));
         props.put("allowAllHostNames", "true");
         HFCAClient caClient = HFCAClient.createNewInstance("https://localhost:7054", props);
         CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();
         caClient.setCryptoSuite(cryptoSuite);
 
         // Create a wallet for managing identities
-        Wallet wallet = Wallets.newFileSystemWallet(Paths.get("wallet"));
+        Wallet wallet = Wallets.newFileSystemWallet(Paths.get(FabricNetworkConstants.wallet));
 
         // Check to see if we've already enrolled the user.
-        if (wallet.get("appUser") != null) {
+        if (wallet.get(userPOJO.getUserName()) != null) {
             String message = "An identity for the user \"appUser\" already exists in the wallet";
             HttpHeaders headers = new HttpHeaders();
             return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.BAD_REQUEST);
