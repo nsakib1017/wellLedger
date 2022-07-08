@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.subsel.healthledger.util.EhrUtils;
@@ -27,7 +28,7 @@ import java.util.*;
 @RequestMapping(path = "/api/wallet")
 public class WalletController extends BaseController {
 
-    @GetMapping(value = "/enrollAdmin", produces = "application/json")
+    @PostMapping(value = "/enrollAdmin", produces = "application/json")
     public ResponseEntity<String> enrollAdmin() throws Exception {
         // Create a CA client for interacting with the CA.
         Properties props = new Properties();
@@ -59,7 +60,7 @@ public class WalletController extends BaseController {
         return new ResponseEntity<String>("Successfully enrolled user \"admin\" and imported it into the wallet", headers, HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping(value = "/registerUser", produces = "application/json")
+    @PostMapping(value = "/registerUser", produces = "application/json")
     public ResponseEntity<String> registerUser() throws Exception {
         // Create a CA client for interacting with the CA.
         // Create a CA client for interacting with the CA.
