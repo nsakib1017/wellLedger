@@ -1,7 +1,7 @@
 package com.subsel.healthledger.core.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.subsel.healthledger.common.model.BaseController;
+import com.subsel.healthledger.common.controller.BaseController;
 import org.hyperledger.fabric.gateway.*;
 import org.hyperledger.fabric.sdk.Enrollment;
 import org.hyperledger.fabric.sdk.User;
@@ -16,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.subsel.healthledger.util.Constants;
+import com.subsel.healthledger.util.EhrUtils;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,7 +32,7 @@ public class WalletController extends BaseController {
         // Create a CA client for interacting with the CA.
         Properties props = new Properties();
         props.put("pemFile",
-                String.format("%s/org1.example.com/ca/ca.org1.example.com-cert.pem",Constants.pathToTestNetwork));
+                String.format("%s/org1.example.com/ca/ca.org1.example.com-cert.pem", EhrUtils.pathToTestNetwork));
         props.put("allowAllHostNames", "true");
         HFCAClient caClient = HFCAClient.createNewInstance("https://localhost:7054", props);
         CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();
@@ -65,7 +65,7 @@ public class WalletController extends BaseController {
         // Create a CA client for interacting with the CA.
         Properties props = new Properties();
         props.put("pemFile",
-                String.format("%s/org1.example.com/ca/ca.org1.example.com-cert.pem", Constants.pathToTestNetwork));
+                String.format("%s/org1.example.com/ca/ca.org1.example.com-cert.pem", EhrUtils.pathToTestNetwork));
         props.put("allowAllHostNames", "true");
         HFCAClient caClient = HFCAClient.createNewInstance("https://localhost:7054", props);
         CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();

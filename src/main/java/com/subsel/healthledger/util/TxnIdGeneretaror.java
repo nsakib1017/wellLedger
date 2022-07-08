@@ -2,7 +2,7 @@ package com.subsel.healthledger.util;
 
 import java.util.Random;
 
-public class AccountIdGenerator {
+public class TxnIdGeneretaror {
     public static String generate() {
         int leftLimit = 48;
         int rightLimit = 122;

@@ -1,4 +1,4 @@
-package com.subsel.healthledger.common.model;
+package com.subsel.healthledger.common.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.subsel.healthledger.common.controller.BaseController;
-import com.subsel.healthledger.core.model.ExtendTimeLimitPOJO;
+import com.subsel.healthledger.core.model.EhrPOJO;
 import org.hyperledger.fabric.gateway.*;
 
 import org.springframework.http.HttpHeaders;
@@ -12,22 +12,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/permissions")
-public class PermissionController extends BaseController {
+@RequestMapping(path = "/api/ehr")
+public class EhrController extends BaseController {
 
-    @PostMapping(value = "/revoke/{id}", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<Map<String, Object>> revokePermission(@PathVariable String id) throws IOException, ContractException {
-        Map<String, Object> response = new HashMap<>();
-        HttpHeaders httpHeaders = new HttpHeaders();
-
+    @GetMapping(value = "/", produces = "application/json")
+    public ResponseEntity<Map<String, Object>> getAllEhr(@RequestBody EhrPOJO ehrPOJO) throws Exception {
         // Load a file system based wallet for managing identities.
         Path walletPath = Paths.get("wallet");
         Wallet wallet = Wallets.newFileSystemWallet(walletPath);
@@ -35,7 +30,9 @@ public class PermissionController extends BaseController {
         Path networkConfigPath = Paths.get("/Users/nsakibpriyo/go/src/github.com/nsakib1017/fabric-samples/fabcar/java/healthledger-2/src/main/java/com/subsel/healthledger/fabricNetwork/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.yaml");
 
         Gateway.Builder builder = Gateway.createBuilder();
-        builder.identity(wallet, "appUser").networkConfig(networkConfigPath).discovery(true);
+        builder.identity(wallet, ehrPOJO.getUname()).networkConfig(networkConfigPath).discovery(true);
+
+        Map<String, Object> queryResults = new HashMap<String, Object>();
 
         // create a gateway connection
         try (Gateway gateway = builder.connect()) {
@@ -44,18 +41,20 @@ public class PermissionController extends BaseController {
             Network network = gateway.getNetwork("mychannel");
             Contract contract = network.getContract("fabcar");
 
-            contract.evaluateTransaction("ChangeData", id, "no");
-            response.put("message", "Permission rvoked!!");
+            byte[] result;
 
-            return new ResponseEntity<Map<String, Object>>(response, httpHeaders, HttpStatus.OK);
+            result = contract.evaluateTransaction("GetAllEhr", ehrPOJO.getUname());
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode actualObj = mapper.readTree(new String(result));
+            queryResults.put("results", actualObj);
+
+            HttpHeaders headers = new HttpHeaders();
+            return new ResponseEntity<Map<String, Object>>(queryResults, headers, HttpStatus.OK);
         }
     }
 
-    @PostMapping(value = "/extend/{id}", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<Map<String, Object>> extendPermission(@PathVariable String id, @RequestBody ExtendTimeLimitPOJO extendTimeLimitPOJO) throws IOException, ContractException {
-        Map<String, Object> response = new HashMap<>();
-        HttpHeaders httpHeaders = new HttpHeaders();
-
+    @GetMapping(value = "/{id}", produces = "application/json")
+    public ResponseEntity<Map<String, Object>> getEhr(@PathVariable String id, @RequestBody EhrPOJO ehrPOJO) throws Exception {
         // Load a file system based wallet for managing identities.
         Path walletPath = Paths.get("wallet");
         Wallet wallet = Wallets.newFileSystemWallet(walletPath);
@@ -63,7 +62,9 @@ public class PermissionController extends BaseController {
         Path networkConfigPath = Paths.get("/Users/nsakibpriyo/go/src/github.com/nsakib1017/fabric-samples/fabcar/java/healthledger-2/src/main/java/com/subsel/healthledger/fabricNetwork/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.yaml");
 
         Gateway.Builder builder = Gateway.createBuilder();
-        builder.identity(wallet, "appUser").networkConfig(networkConfigPath).discovery(true);
+        builder.identity(wallet, ehrPOJO.getUname()).networkConfig(networkConfigPath).discovery(true);
+
+        Map<String, Object> queryResults = new HashMap<String, Object>();
 
         // create a gateway connection
         try (Gateway gateway = builder.connect()) {
@@ -77,22 +78,10 @@ public class PermissionController extends BaseController {
             result = contract.evaluateTransaction("ReadEhr", id);
             ObjectMapper mapper = new ObjectMapper();
             JsonNode actualObj = mapper.readTree(new String(result));
-            String data = String.valueOf(actualObj.get("Data"));
-            int oldMaturity = Integer.parseInt(String.valueOf(actualObj.get("Maturity")));
+            queryResults.put("results", actualObj);
 
-            if (data.equals("yes")) {
-                if(oldMaturity < new Date().getTime()) {
-                    contract.evaluateTransaction("ChangeData", id, "no");
-                    response.put("message", "Token has expired");
-                } else {
-                    oldMaturity = oldMaturity + Integer.parseInt(extendTimeLimitPOJO.getLimit())*60*1000;
-                    contract.evaluateTransaction("ExtendLimit", id, String.valueOf(oldMaturity));
-                    response.put("message", "Limit extended");
-                }
-            } else {
-                response.put("message", "Permission denied");
-            }
-            return new ResponseEntity<Map<String,Object>>(response, httpHeaders, HttpStatus.OK);
+            HttpHeaders headers = new HttpHeaders();
+            return new ResponseEntity<Map<String, Object>>(queryResults, headers, HttpStatus.OK);
         }
     }
 }
