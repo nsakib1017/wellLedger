@@ -63,7 +63,7 @@ export class HealthLedgerContract extends Contract {
         const userString = await this.ReadUser(ctx, username);
         const user = JSON.parse(userString);
         if(user.length !== 0 && user.Password === password){
-            return user;
+            return userString;
         } else {
             return new Error(`The user ${username} does not exist`)
         }
