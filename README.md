@@ -20,7 +20,12 @@ Get HealthLedger DApp up and running.
     
 ### Project Setup
 
-### Launching the application
+#### Launching the application
+
+The link to Hyperledger fabric bin files used for the network is,
+https://drive.google.com/drive/folders/16HkyMHWTRZV8dh_V_GSxg_Bf1N3bsi1S?usp=sharing
+
+Copy the contents of this folder and add them to **bin** directory of the **fabricnetwork** module.
 
 To launch the application, run it as a SpringBoot project using the command:
 
