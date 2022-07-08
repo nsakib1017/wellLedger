@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.subsel.healthledger.util.EhrUtils;
+import com.subsel.healthledger.util.FabricNetworkConstants;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,7 +33,7 @@ public class WalletController extends BaseController {
         // Create a CA client for interacting with the CA.
         Properties props = new Properties();
         props.put("pemFile",
-                String.format("%s/org1.example.com/ca/ca.org1.example.com-cert.pem", EhrUtils.pathToTestNetwork));
+                String.format("%s/org1.example.com/ca/ca.org1.example.com-cert.pem", FabricNetworkConstants.pathToTestNetwork));
         props.put("allowAllHostNames", "true");
         HFCAClient caClient = HFCAClient.createNewInstance("https://localhost:7054", props);
         CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();
@@ -66,7 +66,7 @@ public class WalletController extends BaseController {
         // Create a CA client for interacting with the CA.
         Properties props = new Properties();
         props.put("pemFile",
-                String.format("%s/org1.example.com/ca/ca.org1.example.com-cert.pem", EhrUtils.pathToTestNetwork));
+                String.format("%s/org1.example.com/ca/ca.org1.example.com-cert.pem", FabricNetworkConstants.pathToTestNetwork));
         props.put("allowAllHostNames", "true");
         HFCAClient caClient = HFCAClient.createNewInstance("https://localhost:7054", props);
         CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();

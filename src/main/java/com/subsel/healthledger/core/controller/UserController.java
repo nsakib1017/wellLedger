@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.subsel.healthledger.common.controller.BaseController;
 import com.subsel.healthledger.core.model.UserPOJO;
-import com.subsel.healthledger.util.EhrUtils;
+import com.subsel.healthledger.util.FabricNetworkConstants;
 import okhttp3.Request;
 import org.hyperledger.fabric.gateway.*;
 
@@ -40,9 +40,10 @@ public class UserController extends BaseController {
         // Create a CA client for interacting with the CA.
         Map<String, Object> response = new HashMap<>();
         HttpHeaders httpHeaders = new HttpHeaders();
+
         Properties props = new Properties();
         props.put("pemFile",
-                String.format("%s/org1.example.com/ca/ca.org1.example.com-cert.pem", EhrUtils.pathToTestNetwork));
+                String.format("%s/org1.example.com/ca/ca.org1.example.com-cert.pem", FabricNetworkConstants.pathToTestNetwork));
         props.put("allowAllHostNames", "true");
         HFCAClient caClient = HFCAClient.createNewInstance("https://localhost:7054", props);
         CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();
@@ -118,10 +119,12 @@ public class UserController extends BaseController {
         Enrollment enrollment = caClient.enroll("appUser", enrollmentSecret);
         Identity user = Identities.newX509Identity("Org1MSP", enrollment);
         wallet.put("appUser", user);
+
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] hash = digest.digest(
                 userPOJO.getPassWord().getBytes(StandardCharsets.UTF_8));
         String sha256hex = new String(Hex.encode(hash));
+
         // load a CCP
         Path networkConfigPath = Paths.get("/Users/nsakibpriyo/go/src/github.com/nsakib1017/fabric-samples/fabcar/java/healthledger-2/src/main/java/com/subsel/healthledger/fabricnetwork/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.yaml");
 
@@ -134,6 +137,12 @@ public class UserController extends BaseController {
             // get the network and contract
             Network network = gateway.getNetwork("mychannel");
             Contract contract = network.getContract("fabcar");
+            Map<String, String> requestBody = new HashMap<>();
+            requestBody.put("username", userPOJO.getUserName());
+            requestBody.put("certificate", enrollment.getCert());
+            requestBody.put("password", sha256hex);
+            requestBody.put("mspId", user.getMspId());
+
 
             contract.evaluateTransaction("Register", userPOJO.getUserName(), enrollment.getCert(),sha256hex, user.getMspId());
             response.put("message", "User registered");
@@ -168,6 +177,9 @@ public class UserController extends BaseController {
             Contract contract = network.getContract("fabcar");
 
             byte[] result;
+            Map<String, String> requestBody = new HashMap<>();
+            requestBody.put("username", userPOJO.getUserName());
+            requestBody.put("password", sha256hex);
 
             result = contract.evaluateTransaction("Login", userPOJO.getUserName(), sha256hex);
             ObjectMapper mapper = new ObjectMapper();
