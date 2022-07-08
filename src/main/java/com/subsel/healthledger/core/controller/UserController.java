@@ -2,7 +2,7 @@ package com.subsel.healthledger.core.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.JSONPObject;
+
 import com.subsel.healthledger.common.model.BaseController;
 import org.hyperledger.fabric.gateway.*;
 
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import springfox.documentation.spring.web.json.Json;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -39,8 +38,6 @@ public class UserController extends BaseController {
         Gateway.Builder builder = Gateway.createBuilder();
         builder.identity(wallet, "appUser").networkConfig(networkConfigPath).discovery(true);
 
-        Map<String, Object> queryResults = new HashMap<String, Object>();
-
         // create a gateway connection
         try (Gateway gateway = builder.connect()) {
 
@@ -65,7 +62,7 @@ public class UserController extends BaseController {
                     JsonNode mainResultObject = mapper.readTree(new String(mainResult));
                     response.put("result", mainResultObject);
                 }
-            }else {
+            } else {
                 response.put("message", "Permission denied");
             }
             HttpHeaders httpHeaders = new HttpHeaders();
