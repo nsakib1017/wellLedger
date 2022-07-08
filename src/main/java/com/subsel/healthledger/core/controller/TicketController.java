@@ -22,14 +22,14 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/ticket")
-public class PermissionController extends BaseController {
+public class TicketController extends BaseController {
 
     @PostMapping(value = "/", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Map<String, Object>> createToken(@PathVariable String id, @RequestBody TicketPOJO ticketPojo) throws Exception {
 
         String pointer = TxnIdGeneretaror.generate();
         long issued = new Date().getTime();
-        // Maturity in milisecond
+        // Maturity time in milliseconds
         long maturity = 60 * 1000 * Long.parseLong(ticketPojo.getLimit());
 
         // Load a file system based wallet for managing identities.
