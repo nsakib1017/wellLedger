@@ -1,5 +1,7 @@
 package com.subsel.healthledger.core.controller;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.subsel.healthledger.common.model.BaseController;
 import org.hyperledger.fabric.gateway.*;
 import org.hyperledger.fabric.sdk.Enrollment;
 import org.hyperledger.fabric.sdk.User;
@@ -16,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.subsel.healthledger.util.Constants;
 
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.PrivateKey;
@@ -24,11 +25,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping(path = "/api/wallet")
-public class WalletController {
-
-    static {
-        System.setProperty("org.hyperledger.fabric.sdk.service_discovery.as_localhost", "true");
-    }
+public class WalletController extends BaseController {
 
     @GetMapping(value = "/enrollAdmin", produces = "application/json")
     public ResponseEntity<String> enrollAdmin() throws Exception {
@@ -172,18 +169,9 @@ public class WalletController {
             byte[] result;
 
             result = contract.evaluateTransaction("GetAllEhr", "genesis");
-            queryResults.put("queryAllCars", new String(result));
-
-//            contract.submitTransaction("createCar", "CAR10", "VW", "Polo", "Grey", "Mary");
-//
-//            result = contract.evaluateTransaction("queryCar", "CAR10");
-//            queryResults.put("queryCar", new String(result));
-//
-//
-//            contract.submitTransaction("changeCarOwner", "CAR10", "Archie");
-//
-//            result = contract.evaluateTransaction("queryCar", "CAR10");
-//            queryResults.put("queryCar", new String(result));
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode actualObj = mapper.readTree(new String(result));
+            queryResults.put("queryAllCars", actualObj);
 
             HttpHeaders headers = new HttpHeaders();
             return new ResponseEntity<Map<String, Object>>(queryResults, headers, HttpStatus.OK);
