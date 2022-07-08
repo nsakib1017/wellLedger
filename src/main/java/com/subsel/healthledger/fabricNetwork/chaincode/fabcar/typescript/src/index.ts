@@ -2,7 +2,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FabCar } from './fabcar';
-export { FabCar } from './fabcar';
+import {HealthLedgerContract} from './healthLedger';
 
-export const contracts: any[] = [ FabCar ];
+export {HealthLedgerContract} from './healthLedger';
+
+export const contracts: any[] = [HealthLedgerContract];

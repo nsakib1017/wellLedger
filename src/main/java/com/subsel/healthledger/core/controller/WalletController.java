@@ -171,19 +171,19 @@ public class WalletController {
 
             byte[] result;
 
-            result = contract.evaluateTransaction("queryAllCars");
+            result = contract.evaluateTransaction("GetAllEhr", "genesis");
             queryResults.put("queryAllCars", new String(result));
 
-            contract.submitTransaction("createCar", "CAR10", "VW", "Polo", "Grey", "Mary");
-
-            result = contract.evaluateTransaction("queryCar", "CAR10");
-            queryResults.put("queryCar", new String(result));
-
-
-            contract.submitTransaction("changeCarOwner", "CAR10", "Archie");
-
-            result = contract.evaluateTransaction("queryCar", "CAR10");
-            queryResults.put("queryCar", new String(result));
+//            contract.submitTransaction("createCar", "CAR10", "VW", "Polo", "Grey", "Mary");
+//
+//            result = contract.evaluateTransaction("queryCar", "CAR10");
+//            queryResults.put("queryCar", new String(result));
+//
+//
+//            contract.submitTransaction("changeCarOwner", "CAR10", "Archie");
+//
+//            result = contract.evaluateTransaction("queryCar", "CAR10");
+//            queryResults.put("queryCar", new String(result));
 
             HttpHeaders headers = new HttpHeaders();
             return new ResponseEntity<Map<String, Object>>(queryResults, headers, HttpStatus.OK);
