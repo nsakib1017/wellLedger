@@ -1,7 +1,6 @@
 package com.subsel.healthledger.core.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.subsel.healthledger.common.controller.BaseController;
 import com.subsel.healthledger.core.model.UserPOJO;
@@ -20,11 +19,8 @@ import org.hyperledger.fabric_ca.sdk.RegistrationRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.codec.Hex;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.PrivateKey;
 import java.util.*;
