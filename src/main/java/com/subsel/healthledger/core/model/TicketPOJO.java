@@ -6,5 +6,6 @@ import lombok.Data;
 public class TicketPOJO {
     private final String limit;
     private final String uname;
+    private final String orgMsp;
     private final String key;
 }
