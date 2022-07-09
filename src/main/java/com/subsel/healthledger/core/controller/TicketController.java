@@ -75,12 +75,14 @@ public class TicketController extends BaseController {
                 ticketPOJO.getOrgMsp(),
                 requestBody
         );
+
         JsonNode resultObj = (JsonNode) response.get("results");
         String data = String.valueOf(resultObj.get("Data"));
         int oldMaturity = Integer.parseInt(String.valueOf(resultObj.get("Maturity")));
-        if (data.equals("yes")) {
+
+        if (data.equals(FabricUtils.permissionStatus.yes.toString())) {
             if(oldMaturity < new Date().getTime()) {
-                requestBody.put("data", FabricUtils.permissionStatus.yes.toString());
+                requestBody.put("data", FabricUtils.permissionStatus.no.toString());
                 response = FabricUtils.getFabricResults(
                         FabricUtils.ContractName.ChangeData.toString(),
                         ticketPOJO.getUname(),

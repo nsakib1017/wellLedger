@@ -166,11 +166,13 @@ public class UserController extends BaseController {
                 userPOJO.getMspOrg(),
                 requestBody
         );
+
         JsonNode resultObj = (JsonNode) response.get("results");
         String data = String.valueOf(resultObj.get("Data"));
-        if (data.equals("yes")) {
+
+        if (data.equals(FabricUtils.permissionStatus.yes.toString())) {
                 if(Integer.parseInt(String.valueOf(resultObj.get("Maturity"))) < new Date().getTime()) {
-                    requestBody.put("data", FabricUtils.permissionStatus.yes.toString());
+                    requestBody.put("data", FabricUtils.permissionStatus.no.toString());
                     response = FabricUtils.getFabricResults(
                             FabricUtils.ContractName.ChangeData.toString(),
                             userPOJO.getUserName(),
@@ -189,6 +191,7 @@ public class UserController extends BaseController {
             } else {
                 response.put("message", "Permission denied");
             }
+
         HttpHeaders httpHeaders = new HttpHeaders();
         return new ResponseEntity<>(response, httpHeaders, HttpStatus.OK);
     }
