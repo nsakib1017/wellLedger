@@ -40,7 +40,8 @@ public class FabricUtils {
         UserExists,
         ExtendLimit,
         GetAllEhr,
-        GetAllUser
+        GetAllUser,
+        GetAllEhrByUser
     }
 
     public static Map<String, Object> getFabricResults(String contractName, String userName, String orgMsp, Map<String, Object> contractBody) throws Exception {
@@ -181,7 +182,8 @@ public class FabricUtils {
                 response.put("ehrData", requestResult.get("pointer").toString());
                 break;
 
-            case GetAllEhr:
+            case GetAllEhrByUser:
+            case ReadUser:
                 result = contract.evaluateTransaction(
                         contractName.toString(),
                         requestResult.get("username").toString()

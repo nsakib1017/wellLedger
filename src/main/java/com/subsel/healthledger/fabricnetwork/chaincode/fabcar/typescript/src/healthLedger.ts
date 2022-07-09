@@ -157,7 +157,7 @@ export class HealthLedgerContract extends Contract {
     // GetAllAssets returns all assets found in the world state.
     @Transaction(false)
     @Returns('string')
-    public async GetAllEhr(ctx: Context, uname: string): Promise<string> {
+    public async GetAllEhrByUser(ctx: Context, uname: string): Promise<string> {
         const allResults = [];
         // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
         // const query = `{"selector":{"docType":"user", "uname": "${uname}"}`
@@ -184,6 +184,34 @@ export class HealthLedgerContract extends Contract {
         return JSON.stringify(allResults);
     }
 
+    @Transaction(false)
+    @Returns('string')
+    public async GetAllEhr(ctx: Context): Promise<string> {
+        const allResults = [];
+        // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
+        // const query = `{"selector":{"docType":"user", "uname": "${uname}"}`
+        const query = {
+            selector: {
+                docType: 'data',
+            }
+        };
+        const iterator = await ctx.stub.getQueryResult(JSON.stringify(query));
+        let result = await iterator.next();
+        while (!result.done) {
+            const strValue = Buffer.from(result.value.value.toString()).toString('utf8');
+            let record;
+            try {
+                record = JSON.parse(strValue);
+            } catch (err) {
+                console.log(err);
+                record = strValue;
+            }
+            allResults.push({Key: result.value.key, Record: record});
+            result = await iterator.next();
+        }
+        return JSON.stringify(allResults);
+    }
+    
     @Transaction(false)
     @Returns('string')
     public async GetAllUser(ctx: Context): Promise<string> {

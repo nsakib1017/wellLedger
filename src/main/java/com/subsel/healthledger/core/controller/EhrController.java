@@ -35,7 +35,7 @@ public class EhrController extends BaseController {
         Map<String, Object> response = FabricUtils.getFabricResults(
                 FabricUtils.ContractName.CreateEhr.toString(),
                 ehrPOJO.getUname(),
-                FabricUtils.OrgMsp.Org1MSP.toString(),
+                ehrPOJO.getOrgMsp(),
                 requestBody
         );
 
@@ -44,15 +44,15 @@ public class EhrController extends BaseController {
     }
 
     @GetMapping(value = "/getAllEhrByUser", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> getAllEhr(@RequestParam String username) throws Exception {
+    public ResponseEntity<Map<String, Object>> getAllEhrByUser(@RequestParam String username, @RequestParam String orgMsp) throws Exception {
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("username", username);
 
         Map<String, Object> response = FabricUtils.getFabricResults(
-                FabricUtils.ContractName.GetAllEhr.toString(),
+                FabricUtils.ContractName.GetAllEhrByUser.toString(),
                 username,
-                FabricUtils.OrgMsp.Org1MSP.toString(),
+                orgMsp,
                 requestBody
         );
 
@@ -61,7 +61,7 @@ public class EhrController extends BaseController {
     }
 
     @GetMapping(value = "/{id}", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> getEhr(@PathVariable String id, @RequestParam String username) throws Exception {
+    public ResponseEntity<Map<String, Object>> getEhr(@PathVariable String id, @RequestParam String username, @RequestParam String orgMsp) throws Exception {
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("id", id);
@@ -69,7 +69,7 @@ public class EhrController extends BaseController {
         Map<String, Object> response = FabricUtils.getFabricResults(
                 FabricUtils.ContractName.ReadEhr.toString(),
                 username,
-                FabricUtils.OrgMsp.Org1MSP.toString(),
+                orgMsp,
                 requestBody
         );
 

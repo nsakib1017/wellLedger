@@ -59,19 +59,34 @@ public class AdminController extends BaseController {
         return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/testContract", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> testChain(@RequestParam Map<String, String> allParam) throws Exception {
+    @GetMapping(value = "/getAllUser", produces = "application/json")
+    public ResponseEntity<Map<String, Object>> getAllUser(@RequestParam String username, @RequestParam String orgMsp) throws Exception {
         // Create a CA client for interacting with the CA.
         Map<String, Object> response;
 
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("username", allParam.get("username"));
-        requestBody.put("password", allParam.get("password"));
 
         response = FabricUtils.getFabricResults(
                 FabricUtils.ContractName.GetAllUser.toString(),
-                allParam.get("username"),
-                allParam.get("password"),
+                username,
+                orgMsp,
+                requestBody
+        );
+        HttpHeaders headers = new HttpHeaders();
+        return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/getAllEhrr", produces = "application/json")
+    public ResponseEntity<Map<String, Object>> getAllEhr(@RequestParam String username, @RequestParam String orgMsp) throws Exception {
+        // Create a CA client for interacting with the CA.
+        Map<String, Object> response;
+
+        Map<String, Object> requestBody = new HashMap<>();
+
+        response = FabricUtils.getFabricResults(
+                FabricUtils.ContractName.GetAllEhr.toString(),
+                username,
+                orgMsp,
                 requestBody
         );
         HttpHeaders headers = new HttpHeaders();

@@ -130,6 +130,24 @@ public class UserController extends BaseController {
         return new ResponseEntity<>(response, httpHeaders, HttpStatus.CREATED);
     }
 
+    @GetMapping(value = "/{username}", produces = "application/json", consumes = "application/json")
+    public ResponseEntity<Map<String, Object>> getUserDetails(@PathVariable String username, @RequestParam String orgMsp) throws Exception {
+        Map<String, Object> response = new HashMap<>();
+        HttpHeaders httpHeaders = new HttpHeaders();
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("username", username);
+
+        response = FabricUtils.getFabricResults(
+                FabricUtils.ContractName.ReadUser.toString(),
+                username,
+                orgMsp,
+                requestBody
+        );
+
+        return new ResponseEntity<>(response, httpHeaders, HttpStatus.OK);
+    }
+
     @PostMapping(value = "/login", produces = "application/json", consumes = "application/json")
     public ResponseEntity<Map<String, Object>> loginUser(@RequestBody UserPOJO userPOJO) throws Exception {
         Map<String, Object> response = new HashMap<>();
@@ -149,13 +167,11 @@ public class UserController extends BaseController {
         return new ResponseEntity<>(response, httpHeaders, HttpStatus.OK);
     }
 
-    @GetMapping(value="/data/{id}")
-    public ResponseEntity<Map<String, Object>> getUserData(@PathVariable String id, @RequestBody Map<String, String> allParam) throws Exception {
+    @PostMapping(value="/data/{token}")
+    public ResponseEntity<Map<String, Object>> getUserDataByToken(@PathVariable String token,@RequestParam String username, @RequestParam String mspOrg) throws Exception {
 
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("id", id);
-        String username = allParam.get("username");
-        String mspOrg = allParam.get("mspOrg");
+        requestBody.put("id", token);
 
         Map<String, Object>  response = FabricUtils.getFabricResults(
                 FabricUtils.ContractName.ReadEhr.toString(),
