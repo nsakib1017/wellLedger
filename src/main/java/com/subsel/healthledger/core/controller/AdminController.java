@@ -1,7 +1,9 @@
 package com.subsel.healthledger.core.controller;
 import com.subsel.healthledger.common.controller.BaseController;
 
+import com.subsel.healthledger.core.model.AdminPOJO;
 import com.subsel.healthledger.util.FabricUtils;
+import okhttp3.Request;
 import org.hyperledger.fabric.gateway.*;
 import org.hyperledger.fabric.sdk.Enrollment;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
@@ -13,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.subsel.healthledger.util.FabricNetworkConstants;
@@ -25,21 +28,21 @@ import java.util.*;
 public class AdminController extends BaseController {
 
     @PostMapping(value = "/enroll", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> enrollAdmin() throws Exception {
+    public ResponseEntity<Map<String, Object>> enrollAdmin(@RequestBody AdminPOJO adminPOJO, Request req) throws Exception {
         // Create a CA client for interacting with the CA.
         Map<String, Object> response = new HashMap<>();
         Properties props = new Properties();
-        props.put("pemFile", FabricNetworkConstants.pathToOrg1TestNetwork);
+        props.put("pemFile", FabricUtils.getNetworkConfigCertPath(adminPOJO.getAdminOrgMsp()));
         props.put("allowAllHostNames", "true");
         HFCAClient caClient = HFCAClient.createNewInstance("https://localhost:7054", props);
         CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();
         caClient.setCryptoSuite(cryptoSuite);
 
         // Create a wallet for managing identities
-        Wallet wallet = Wallets.newFileSystemWallet(Paths.get("wallet"));
+        Wallet wallet = Wallets.newFileSystemWallet(Paths.get(FabricNetworkConstants.wallet));
 
         // Check to see if we've already enrolled the admin user.
-        if (wallet.get("admin") != null) {
+        if (wallet.get(adminPOJO.getAdminName()) != null) {
             HttpHeaders headers = new HttpHeaders();
             response.put("message", "An identity for the admin user \"admin\" already exists in the wallet");
             return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.BAD_REQUEST);
@@ -50,8 +53,8 @@ public class AdminController extends BaseController {
         enrollmentRequestTLS.addHost("localhost");
         enrollmentRequestTLS.setProfile("tls");
         Enrollment enrollment = caClient.enroll("admin", "adminpw", enrollmentRequestTLS);
-        Identity user = Identities.newX509Identity(String.valueOf(FabricUtils.OrgMsp.Org1MSP), enrollment);
-        wallet.put("admin", user);
+        Identity user = Identities.newX509Identity(FabricUtils.OrgMsp.valueOf(adminPOJO.getAdminOrgMsp()).toString(), enrollment);
+        wallet.put(adminPOJO.getAdminName(), user);
 
         response.put("message", "Successfully enrolled user \"admin\" and imported it into the wallet");
         HttpHeaders headers = new HttpHeaders();
