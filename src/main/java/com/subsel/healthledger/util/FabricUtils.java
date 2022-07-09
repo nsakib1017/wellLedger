@@ -88,6 +88,22 @@ public class FabricUtils {
         return connectionPath;
     }
 
+    public static String getAffiliatedDept(String orgMsp) {
+        OrgMsp resultOrgMsp = OrgMsp.valueOf(orgMsp);
+        String affiliation;
+        switch (resultOrgMsp) {
+            case Org1MSP:
+                affiliation = "org1.department1";
+                break;
+            case Org2MSP:
+                affiliation = "org2.department1";
+                break;
+            default:
+                affiliation = "";
+        }
+        return affiliation;
+    }
+
     private static String getPasswordDigest (String password) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] hash = digest.digest(

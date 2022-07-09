@@ -7,4 +7,5 @@ public class UserPOJO {
     private final String userName;
     private final String passWord;
     private final String mspOrg;
+    private final String adminName;
 }

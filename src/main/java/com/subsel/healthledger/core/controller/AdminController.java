@@ -34,7 +34,7 @@ public class AdminController extends BaseController {
         Properties props = new Properties();
         props.put("pemFile", FabricUtils.getNetworkConfigCertPath(adminPOJO.getAdminOrgMsp()));
         props.put("allowAllHostNames", "true");
-        HFCAClient caClient = HFCAClient.createNewInstance("https://localhost:7054", props);
+        HFCAClient caClient = HFCAClient.createNewInstance(FabricNetworkConstants.hfaClientURL, props);
         CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();
         caClient.setCryptoSuite(cryptoSuite);
 

@@ -38,7 +38,7 @@ public class UserController extends BaseController {
         Properties props = new Properties();
         props.put("pemFile", FabricUtils.getNetworkConfigCertPath(userPOJO.getMspOrg()));
         props.put("allowAllHostNames", "true");
-        HFCAClient caClient = HFCAClient.createNewInstance("https://localhost:7054", props);
+        HFCAClient caClient = HFCAClient.createNewInstance(FabricNetworkConstants.hfaClientURL, props);
         CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();
         caClient.setCryptoSuite(cryptoSuite);
 
@@ -54,7 +54,7 @@ public class UserController extends BaseController {
 
         }
 
-        X509Identity adminIdentity = (X509Identity)wallet.get("admin");
+        X509Identity adminIdentity = (X509Identity)wallet.get(userPOJO.getAdminName());
         if (adminIdentity == null) {
             String message = "\"admin\" needs to be enrolled and added to the wallet first";
             HttpHeaders headers = new HttpHeaders();
@@ -80,7 +80,7 @@ public class UserController extends BaseController {
 
             @Override
             public String getAffiliation() {
-                return "org1.department1";
+                return FabricUtils.getAffiliatedDept(userPOJO.getMspOrg());
             }
 
             @Override
@@ -101,14 +101,14 @@ public class UserController extends BaseController {
 
             @Override
             public String getMspId() {
-                return "Org1MSP";
+                return FabricUtils.OrgMsp.valueOf(userPOJO.getMspOrg()).toString();
             }
 
         };
 
         // Register the user, enroll the user, and import the new identity into the wallet.
         RegistrationRequest registrationRequest = new RegistrationRequest(userPOJO.getUserName());
-        registrationRequest.setAffiliation("org1.department1");
+        registrationRequest.setAffiliation(FabricUtils.getAffiliatedDept(userPOJO.getMspOrg()));
         registrationRequest.setEnrollmentID(userPOJO.getUserName());
         String enrollmentSecret = caClient.register(registrationRequest, admin);
         Enrollment enrollment = caClient.enroll(userPOJO.getUserName(), enrollmentSecret);
