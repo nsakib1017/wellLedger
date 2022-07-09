@@ -131,24 +131,6 @@ public class UserController extends BaseController {
         return new ResponseEntity<>(response, httpHeaders, HttpStatus.CREATED);
     }
 
-    @GetMapping(value = "/{username}", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<Map<String, Object>> getUserDetails(@PathVariable String username, @RequestParam String orgMsp) throws Exception {
-        Map<String, Object> response = new HashMap<>();
-        HttpHeaders httpHeaders = new HttpHeaders();
-
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("username", username);
-
-        response = FabricUtils.getFabricResults(
-                FabricUtils.ContractName.ReadUser.toString(),
-                username,
-                orgMsp,
-                requestBody
-        );
-
-        return new ResponseEntity<>(response, httpHeaders, HttpStatus.OK);
-    }
-
     @PostMapping(value = "/login", produces = "application/json", consumes = "application/json")
     public ResponseEntity<Map<String, Object>> loginUser(@RequestBody UserPOJO userPOJO) throws Exception {
         Map<String, Object> response = new HashMap<>();

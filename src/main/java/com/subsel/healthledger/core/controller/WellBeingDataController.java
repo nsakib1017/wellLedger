@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.subsel.healthledger.common.controller.BaseController;
 import com.subsel.healthledger.core.model.EhrPOJO;
 import com.subsel.healthledger.core.model.TicketPOJO;
+import com.subsel.healthledger.util.FabricNetworkConstants;
 import com.subsel.healthledger.util.FabricUtils;
 import com.subsel.healthledger.util.TxnIdGeneretaror;
 
@@ -17,8 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping(path = "/api/ehr")
-public class EhrController extends BaseController {
+@RequestMapping(path = "/api/wellBeing")
+public class WellBeingDataController extends BaseController {
 
     @PostMapping(value = "/", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Map<String, Object>> createEhr(@RequestBody EhrPOJO ehrPOJO) throws Exception {
@@ -29,7 +30,7 @@ public class EhrController extends BaseController {
         requestBody.put("pointer", ehrId);
         requestBody.put("key", ehrId);
         requestBody.put("username", ehrPOJO.getUname());
-        requestBody.put("type", "ehr");
+        requestBody.put("type", FabricUtils.dataType.wellBeing);
         requestBody.put("data", "QmHash##");
         requestBody.put("issued", issued);
         requestBody.put("maturity", "N/A");

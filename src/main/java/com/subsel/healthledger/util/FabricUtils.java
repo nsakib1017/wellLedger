@@ -28,6 +28,11 @@ public class FabricUtils {
         no
     }
 
+    public enum dataType {
+        permission,
+        wellBeing
+    }
+
     public enum ContractName {
         Register,
         Login,

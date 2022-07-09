@@ -32,8 +32,8 @@ public class TicketController extends BaseController {
         requestBody.put("pointer", pointer);
         requestBody.put("key", ehrId);
         requestBody.put("username", ticketPojo.getUname());
-        requestBody.put("type", "permission");
-        requestBody.put("data", "yes");
+        requestBody.put("type", FabricUtils.dataType.permission);
+        requestBody.put("data", FabricUtils.permissionStatus.yes);
         requestBody.put("issued", issued);
         requestBody.put("maturity", maturity);
 
@@ -48,10 +48,10 @@ public class TicketController extends BaseController {
         return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.CREATED);
     }
 
-    @PostMapping(value = "/revoke/{id}", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<Map<String, Object>> revokePermission(@PathVariable String id, @RequestBody TicketPOJO ticketPOJO) throws Exception {
+    @PostMapping(value = "/revoke/{ticketId}", produces = "application/json", consumes = "application/json")
+    public ResponseEntity<Map<String, Object>> revokePermission(@PathVariable String ticketId, @RequestBody TicketPOJO ticketPOJO) throws Exception {
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("id", id);
+        requestBody.put("id", ticketId);
         requestBody.put("data", String.valueOf(FabricUtils.permissionStatus.no));
 
         Map<String, Object> response = FabricUtils.getFabricResults(
@@ -65,10 +65,10 @@ public class TicketController extends BaseController {
         return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.OK);
     }
 
-    @PostMapping(value = "/extend/{id}", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<Map<String, Object>> extendPermission(@PathVariable String id, @RequestBody TicketPOJO ticketPOJO) throws Exception {
+    @PostMapping(value = "/extend/{ticketId}", produces = "application/json", consumes = "application/json")
+    public ResponseEntity<Map<String, Object>> extendPermission(@PathVariable String ticketId, @RequestBody TicketPOJO ticketPOJO) throws Exception {
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("id", id);
+        requestBody.put("id", ticketId);
 
         Map<String, Object>  response = FabricUtils.getFabricResults(
                 FabricUtils.ContractName.ReadEhr.toString(),

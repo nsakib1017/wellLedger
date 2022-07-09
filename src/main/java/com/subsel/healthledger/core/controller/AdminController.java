@@ -1,10 +1,6 @@
 package com.subsel.healthledger.core.controller;
 import com.subsel.healthledger.common.controller.BaseController;
 
-import com.subsel.healthledger.core.model.AdminPOJO;
-import com.subsel.healthledger.core.model.UserPOJO;
-import com.subsel.healthledger.util.FabricUtils;
-import okhttp3.Request;
 import org.hyperledger.fabric.gateway.*;
 import org.hyperledger.fabric.sdk.Enrollment;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
@@ -12,11 +8,13 @@ import org.hyperledger.fabric.sdk.security.CryptoSuiteFactory;
 import org.hyperledger.fabric_ca.sdk.EnrollmentRequest;
 import org.hyperledger.fabric_ca.sdk.HFCAClient;
 
+import com.subsel.healthledger.core.model.AdminPOJO;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.subsel.healthledger.util.FabricNetworkConstants;
+import com.subsel.healthledger.util.FabricUtils;
 
 import java.nio.file.Paths;
 import java.util.*;
