@@ -20,6 +20,11 @@ public class FabricUtils {
         Org2MSP
     }
 
+    public enum permissionStatus {
+        yes,
+        no
+    }
+
     public enum ContractName {
         Register,
         Login,

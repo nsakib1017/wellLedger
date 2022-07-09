@@ -56,6 +56,7 @@ public class UserController extends BaseController {
         if (wallet.get(userPOJO.getUserName()) != null) {
             String message = "An identity for the user \"appUser\" already exists in the wallet";
             HttpHeaders headers = new HttpHeaders();
+            response.put("message", message);
             return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.BAD_REQUEST);
 
         }
@@ -64,6 +65,7 @@ public class UserController extends BaseController {
         if (adminIdentity == null) {
             String message = "\"admin\" needs to be enrolled and added to the wallet first";
             HttpHeaders headers = new HttpHeaders();
+            response.put("message", message);
             return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.BAD_REQUEST);
         }
         User admin = new User() {
@@ -112,85 +114,47 @@ public class UserController extends BaseController {
         };
 
         // Register the user, enroll the user, and import the new identity into the wallet.
-        RegistrationRequest registrationRequest = new RegistrationRequest("appUser");
+        RegistrationRequest registrationRequest = new RegistrationRequest(userPOJO.getUserName());
         registrationRequest.setAffiliation("org1.department1");
-        registrationRequest.setEnrollmentID("appUser");
+        registrationRequest.setEnrollmentID(userPOJO.getUserName());
         String enrollmentSecret = caClient.register(registrationRequest, admin);
-        Enrollment enrollment = caClient.enroll("appUser", enrollmentSecret);
-        Identity user = Identities.newX509Identity("Org1MSP", enrollment);
-        wallet.put("appUser", user);
+        Enrollment enrollment = caClient.enroll(userPOJO.getUserName(), enrollmentSecret);
+        Identity user = Identities.newX509Identity(FabricUtils.OrgMsp.valueOf(userPOJO.getMspOrg()).toString(), enrollment);
+        wallet.put(userPOJO.getUserName(), user);
 
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = digest.digest(
-                userPOJO.getPassWord().getBytes(StandardCharsets.UTF_8));
-        String sha256hex = new String(Hex.encode(hash));
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("username", userPOJO.getUserName());
+        requestBody.put("certificate", enrollment.getCert());
+        requestBody.put("password", userPOJO.getPassWord());
+        requestBody.put("mspId", user.getMspId());
 
-        // load a CCP
-        Path networkConfigPath = Paths.get("/Users/nsakibpriyo/go/src/github.com/nsakib1017/fabric-samples/fabcar/java/healthledger-2/src/main/java/com/subsel/healthledger/fabricnetwork/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.yaml");
-
-        Gateway.Builder builder = Gateway.createBuilder();
-        builder.identity(wallet, "appUser").networkConfig(networkConfigPath).discovery(true);
-
-        // create a gateway connection
-        try (Gateway gateway = builder.connect()) {
-
-            // get the network and contract
-            Network network = gateway.getNetwork("mychannel");
-            Contract contract = network.getContract("fabcar");
-            Map<String, String> requestBody = new HashMap<>();
-            requestBody.put("username", userPOJO.getUserName());
-            requestBody.put("certificate", enrollment.getCert());
-            requestBody.put("password", sha256hex);
-            requestBody.put("mspId", user.getMspId());
-
-
-            contract.evaluateTransaction("Register", userPOJO.getUserName(), enrollment.getCert(),sha256hex, user.getMspId());
-            response.put("message", "User registered");
-
-            return new ResponseEntity<Map<String, Object>>(response, httpHeaders, HttpStatus.OK);
-        }
+         response = FabricUtils.getFabricResults(
+                FabricUtils.ContractName.Register.toString(),
+                userPOJO.getUserName(),
+                FabricUtils.OrgMsp.Org1MSP.toString(),
+                requestBody
+        );
+         
+        return new ResponseEntity<Map<String, Object>>(response, httpHeaders, HttpStatus.CREATED);
     }
 
     @PostMapping(value = "/login", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody UserPOJO userPOJO, Request req) throws IOException, ContractException, NoSuchAlgorithmException {
+    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody UserPOJO userPOJO, Request req) throws Exception {
         Map<String, Object> response = new HashMap<>();
         HttpHeaders httpHeaders = new HttpHeaders();
 
-        // Load a file system based wallet for managing identities.
-        Path walletPath = Paths.get("wallet");
-        Wallet wallet = Wallets.newFileSystemWallet(walletPath);
-        // load a CCP
-        Path networkConfigPath = Paths.get("/Users/nsakibpriyo/go/src/github.com/nsakib1017/fabric-samples/fabcar/java/healthledger-2/src/main/java/com/subsel/healthledger/fabricnetwork/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.yaml");
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("username", userPOJO.getUserName());
+        requestBody.put("password", userPOJO.getPassWord());
 
-        Gateway.Builder builder = Gateway.createBuilder();
-        builder.identity(wallet, "appUser").networkConfig(networkConfigPath).discovery(true);
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = digest.digest(
-                userPOJO.getPassWord().getBytes(StandardCharsets.UTF_8));
-        String sha256hex = new String(Hex.encode(hash));
+        response = FabricUtils.getFabricResults(
+                FabricUtils.ContractName.Login.toString(),
+                userPOJO.getUserName(),
+                userPOJO.getMspOrg(),
+                requestBody
+        );
 
-        // create a gateway connection
-        try (Gateway gateway = builder.connect()) {
-
-            // get the network and contract
-            Network network = gateway.getNetwork("mychannel");
-            Contract contract = network.getContract("fabcar");
-
-            byte[] result;
-            Map<String, String> requestBody = new HashMap<>();
-            requestBody.put("username", userPOJO.getUserName());
-            requestBody.put("password", sha256hex);
-
-            result = contract.evaluateTransaction("Login", userPOJO.getUserName(), sha256hex);
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode actualObj = mapper.readTree(new String(result));
-            if(!actualObj.get("username").isEmpty())
-                response.put("message", "Login Successful");
-            else
-                response.put("message", "Login Failed");
-
-            return new ResponseEntity<Map<String, Object>>(response, httpHeaders, HttpStatus.OK);
-        }
+        return new ResponseEntity<Map<String, Object>>(response, httpHeaders, HttpStatus.OK);
     }
 
     @GetMapping(value="/data/{id}")
