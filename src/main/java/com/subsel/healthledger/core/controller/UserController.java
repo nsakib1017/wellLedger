@@ -168,7 +168,7 @@ public class UserController extends BaseController {
         return new ResponseEntity<>(response, httpHeaders, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/{username}", produces = "application/json", consumes = "application/json")
+    @GetMapping(value = "/{username}", produces = "application/json")
     public ResponseEntity<Map<String, Object>> userDetails(@PathVariable String username, @RequestParam String orgMsp) throws Exception {
         Map<String, Object> response;
         HttpHeaders httpHeaders = new HttpHeaders();
