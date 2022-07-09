@@ -53,9 +53,9 @@ public class AdminController extends BaseController {
         Identity user = Identities.newX509Identity(String.valueOf(FabricUtils.OrgMsp.Org1MSP), enrollment);
         wallet.put("admin", user);
 
-        response.put("message", "Successfully enrolled user \\\"admin\\\" and imported it into the wallet");
+        response.put("message", "Successfully enrolled user \"admin\" and imported it into the wallet");
         HttpHeaders headers = new HttpHeaders();
-        return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.OK);
     }
 
 }

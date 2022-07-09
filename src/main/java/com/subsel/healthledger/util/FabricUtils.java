@@ -182,6 +182,7 @@ public class FabricUtils {
             default:
                 response.put("message", "Invalid contract");
         }
+        gateway.close();
         return response;
     }
 

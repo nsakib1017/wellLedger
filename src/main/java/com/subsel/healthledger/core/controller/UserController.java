@@ -24,11 +24,8 @@ import org.springframework.security.crypto.codec.Hex;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.*;
 
@@ -135,7 +132,7 @@ public class UserController extends BaseController {
                 requestBody
         );
          
-        return new ResponseEntity<Map<String, Object>>(response, httpHeaders, HttpStatus.CREATED);
+        return new ResponseEntity<>(response, httpHeaders, HttpStatus.CREATED);
     }
 
     @PostMapping(value = "/login", produces = "application/json", consumes = "application/json")
@@ -154,51 +151,45 @@ public class UserController extends BaseController {
                 requestBody
         );
 
-        return new ResponseEntity<Map<String, Object>>(response, httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(response, httpHeaders, HttpStatus.OK);
     }
 
     @GetMapping(value="/data/{id}")
-    public ResponseEntity<Map<String, Object>> getUserData(@PathVariable String id, Request req) throws IOException, ContractException {
+    public ResponseEntity<Map<String, Object>> getUserData(@PathVariable String id, @RequestBody UserPOJO userPOJO,Request req) throws Exception {
 
-        // Load a file system based wallet for managing identities.
-        Path walletPath = Paths.get("wallet");
-        Map<String, Object> response = new HashMap<>();
-        Wallet wallet = Wallets.newFileSystemWallet(walletPath);
-        // load a CCP
-        Path networkConfigPath = Paths.get("/Users/nsakibpriyo/go/src/github.com/nsakib1017/fabric-samples/fabcar/java/healthledger-2/src/main/java/com/subsel/healthledger/fabricnetwork/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.yaml");
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("id", id);
 
-        Gateway.Builder builder = Gateway.createBuilder();
-        builder.identity(wallet, "appUser").networkConfig(networkConfigPath).discovery(true);
-
-        // create a gateway connection
-        try (Gateway gateway = builder.connect()) {
-
-            // get the network and contract
-            Network network = gateway.getNetwork("mychannel");
-            Contract contract = network.getContract("fabcar");
-
-            byte[] result;
-
-            result = contract.evaluateTransaction("ReadEhr", id);
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode actualObj = mapper.readTree(new String(result));
-            String data = String.valueOf(actualObj.get("Data"));
-
-            if (data.equals("yes")) {
-                if(Integer.parseInt(String.valueOf(actualObj.get("Maturity"))) < new Date().getTime()) {
-                    contract.evaluateTransaction("ChangeData", id, "no");
-                    response.put("message", "Token has expired");
+        Map<String, Object>  response = FabricUtils.getFabricResults(
+                FabricUtils.ContractName.ReadEhr.toString(),
+                userPOJO.getUserName(),
+                userPOJO.getMspOrg(),
+                requestBody
+        );
+        JsonNode resultObj = (JsonNode) response.get("results");
+        String data = String.valueOf(resultObj.get("Data"));
+        if (data.equals("yes")) {
+                if(Integer.parseInt(String.valueOf(resultObj.get("Maturity"))) < new Date().getTime()) {
+                    requestBody.put("data", FabricUtils.permissionStatus.yes.toString());
+                    response = FabricUtils.getFabricResults(
+                            FabricUtils.ContractName.ChangeData.toString(),
+                            userPOJO.getUserName(),
+                            userPOJO.getMspOrg(),
+                            requestBody
+                    );
                 } else {
-                    byte[] mainResult;
-                    mainResult = contract.evaluateTransaction("ReadEhr", String.valueOf(actualObj.get("Key")));
-                    JsonNode mainResultObject = mapper.readTree(new String(mainResult));
-                    response.put("result", mainResultObject);
+                    requestBody.put("id", String.valueOf(resultObj.get("Key")));
+                    response = FabricUtils.getFabricResults(
+                            FabricUtils.ContractName.ReadEhr.toString(),
+                            userPOJO.getUserName(),
+                            userPOJO.getMspOrg(),
+                            requestBody
+                    );
                 }
             } else {
                 response.put("message", "Permission denied");
             }
-            HttpHeaders httpHeaders = new HttpHeaders();
-            return new ResponseEntity<Map<String,Object>>(response, httpHeaders, HttpStatus.OK);
-        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        return new ResponseEntity<>(response, httpHeaders, HttpStatus.OK);
     }
 }
