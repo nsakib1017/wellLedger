@@ -12,4 +12,5 @@ public class EhrPOJO {
     private final String sleepTime;
     private final String date;
     private final String heartRate;
+    private final String orgMsp;
 }

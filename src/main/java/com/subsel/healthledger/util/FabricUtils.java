@@ -14,6 +14,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FabricUtils {
+    static {
+        System.setProperty("org.hyperledger.fabric.sdk.service_discovery.as_localhost", "true");
+    }
 
     public enum OrgMsp {
         Org1MSP,
@@ -36,7 +39,8 @@ public class FabricUtils {
         ChangeData,
         UserExists,
         ExtendLimit,
-        GetAllEhr
+        GetAllEhr,
+        GetAllUser
     }
 
     public static Map<String, Object> getFabricResults(String contractName, String userName, String orgMsp, Map<String, Object> contractBody) throws Exception {
@@ -88,6 +92,22 @@ public class FabricUtils {
         return connectionPath;
     }
 
+    public static String getHFAClientURL(String orgMsp) {
+        OrgMsp resultOrgMsp = OrgMsp.valueOf(orgMsp);
+        String connectionPath;
+        switch (resultOrgMsp) {
+            case Org1MSP:
+                connectionPath = FabricNetworkConstants.org1HfaClientURL;
+                break;
+            case Org2MSP:
+                connectionPath = FabricNetworkConstants.org2HfaClientURL;
+                break;
+            default:
+                connectionPath = "";
+        }
+        return connectionPath;
+    }
+
     public static String getAffiliatedDept(String orgMsp) {
         OrgMsp resultOrgMsp = OrgMsp.valueOf(orgMsp);
         String affiliation;
@@ -113,7 +133,7 @@ public class FabricUtils {
 
     private static Map<String, Object> contractFactory(Gateway gateway, String contractStringValue, Map<String, Object> requestResult) throws Exception {
 
-        Network network = gateway.getNetwork(FabricNetworkConstants.wallet);
+        Network network = gateway.getNetwork(FabricNetworkConstants.networkName);
         Contract contract = network.getContract(FabricNetworkConstants.contractName);
 
         Map<String, Object> response = new HashMap<>();
@@ -124,7 +144,7 @@ public class FabricUtils {
 
         switch (contractName){
             case Register:
-                contract.evaluateTransaction(
+                contract.submitTransaction(
                         contractName.toString(),
                         requestResult.get("username").toString(),
                         requestResult.get("certificate").toString(),
@@ -141,14 +161,14 @@ public class FabricUtils {
                         getPasswordDigest(requestResult.get("password").toString())
                 );
                 actualObj = mapper.readTree(new String(result));
-                if (!actualObj.get("username").isEmpty())
+                if (!actualObj.get("Username").toString().isEmpty())
                     response.put("message", "Login Successful");
                 else
                     response.put("message", "Login Failed");
                 break;
 
             case CreateEhr:
-                 contract.evaluateTransaction(
+                 contract.submitTransaction(
                         contractName.toString(),
                         requestResult.get("pointer").toString(),
                         requestResult.get("key").toString(),
@@ -180,7 +200,7 @@ public class FabricUtils {
                 break;
 
             case ChangeData:
-                contract.evaluateTransaction(
+                contract.submitTransaction(
                         contractName.toString(),
                         requestResult.get("id").toString(),
                         requestResult.get("data").toString());
@@ -188,11 +208,18 @@ public class FabricUtils {
                 break;
 
             case ExtendLimit:
-                contract.evaluateTransaction(
+                contract.submitTransaction(
                         contractName.toString(),
                         requestResult.get("id").toString(),
                         requestResult.get("maturity").toString());
                 response.put("message", "Permission extended!!");
+                break;
+
+            case GetAllUser:
+                result = contract.evaluateTransaction(
+                        contractName.toString());
+                actualObj = mapper.readTree(new String(result));
+                response.put("results", actualObj);
                 break;
 
             default:

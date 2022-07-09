@@ -19,7 +19,7 @@ import java.util.Map;
 public class EhrController extends BaseController {
 
     @PostMapping(value = "/", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> createEhr(@PathVariable String id, @RequestBody EhrPOJO ehrPOJO) throws Exception {
+    public ResponseEntity<Map<String, Object>> createEhr(@RequestBody EhrPOJO ehrPOJO) throws Exception {
 
         String ehrId = TxnIdGeneretaror.generate();
         String issued = String.valueOf(new Date().getTime());
@@ -43,15 +43,15 @@ public class EhrController extends BaseController {
         return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.CREATED);
     }
 
-    @GetMapping(value = "/", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> getAllEhr(@RequestBody EhrPOJO ehrPOJO) throws Exception {
+    @GetMapping(value = "/getAllEhrByUser", produces = "application/json")
+    public ResponseEntity<Map<String, Object>> getAllEhr(@RequestParam String username) throws Exception {
 
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("username", ehrPOJO.getUname());
+        requestBody.put("username", username);
 
         Map<String, Object> response = FabricUtils.getFabricResults(
                 FabricUtils.ContractName.GetAllEhr.toString(),
-                ehrPOJO.getUname(),
+                username,
                 FabricUtils.OrgMsp.Org1MSP.toString(),
                 requestBody
         );
@@ -61,14 +61,14 @@ public class EhrController extends BaseController {
     }
 
     @GetMapping(value = "/{id}", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> getEhr(@PathVariable String id, @RequestBody EhrPOJO ehrPOJO) throws Exception {
+    public ResponseEntity<Map<String, Object>> getEhr(@PathVariable String id, @RequestParam String username) throws Exception {
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("id", id);
 
         Map<String, Object> response = FabricUtils.getFabricResults(
                 FabricUtils.ContractName.ReadEhr.toString(),
-                ehrPOJO.getUname(),
+                username,
                 FabricUtils.OrgMsp.Org1MSP.toString(),
                 requestBody
         );

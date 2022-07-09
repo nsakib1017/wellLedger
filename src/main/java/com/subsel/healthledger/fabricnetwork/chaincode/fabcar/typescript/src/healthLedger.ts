@@ -50,6 +50,7 @@ export class HealthLedgerContract extends Contract {
         }
 
         const user: User = {
+            docType: "user",
             Identity: identity,
             Username: username,
             Password: password,
@@ -78,6 +79,7 @@ export class HealthLedgerContract extends Contract {
         }
 
         const ehrData: Data = {
+            docType: "data",
             ID: id,
             Key: key,
             Type: type,
@@ -163,6 +165,34 @@ export class HealthLedgerContract extends Contract {
             selector: {
                 docType: 'data',
                 Username: uname
+            }
+        };
+        const iterator = await ctx.stub.getQueryResult(JSON.stringify(query));
+        let result = await iterator.next();
+        while (!result.done) {
+            const strValue = Buffer.from(result.value.value.toString()).toString('utf8');
+            let record;
+            try {
+                record = JSON.parse(strValue);
+            } catch (err) {
+                console.log(err);
+                record = strValue;
+            }
+            allResults.push({Key: result.value.key, Record: record});
+            result = await iterator.next();
+        }
+        return JSON.stringify(allResults);
+    }
+
+    @Transaction(false)
+    @Returns('string')
+    public async GetAllUser(ctx: Context): Promise<string> {
+        const allResults = [];
+        // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
+        // const query = `{"selector":{"docType":"user", "uname": "${uname}"}`
+        const query = {
+            selector: {
+                docType: 'user'
             }
         };
         const iterator = await ctx.stub.getQueryResult(JSON.stringify(query));

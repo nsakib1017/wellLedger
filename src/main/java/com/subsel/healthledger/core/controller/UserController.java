@@ -30,7 +30,7 @@ import java.util.*;
 public class UserController extends BaseController {
 
     @PostMapping(value = "/", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> registerUser(@RequestBody UserPOJO userPOJO, Request req) throws Exception{
+    public ResponseEntity<Map<String, Object>> registerUser(@RequestBody UserPOJO userPOJO) throws Exception{
         // Create a CA client for interacting with the CA.
         Map<String, Object> response = new HashMap<>();
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -38,7 +38,7 @@ public class UserController extends BaseController {
         Properties props = new Properties();
         props.put("pemFile", FabricUtils.getNetworkConfigCertPath(userPOJO.getMspOrg()));
         props.put("allowAllHostNames", "true");
-        HFCAClient caClient = HFCAClient.createNewInstance(FabricNetworkConstants.hfaClientURL, props);
+        HFCAClient caClient = HFCAClient.createNewInstance(FabricUtils.getHFAClientURL(userPOJO.getMspOrg()), props);
         CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();
         caClient.setCryptoSuite(cryptoSuite);
 
@@ -118,13 +118,12 @@ public class UserController extends BaseController {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("username", userPOJO.getUserName());
         requestBody.put("certificate", enrollment.getCert());
-        requestBody.put("password", userPOJO.getPassWord());
+        requestBody.put("password", userPOJO.getPassword());
         requestBody.put("mspId", user.getMspId());
 
          response = FabricUtils.getFabricResults(
                 FabricUtils.ContractName.Register.toString(),
-                userPOJO.getUserName(),
-                FabricUtils.OrgMsp.Org1MSP.toString(),
+                userPOJO.getUserName(),userPOJO.getMspOrg(),
                 requestBody
         );
          
@@ -132,13 +131,13 @@ public class UserController extends BaseController {
     }
 
     @PostMapping(value = "/login", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody UserPOJO userPOJO, Request req) throws Exception {
+    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody UserPOJO userPOJO) throws Exception {
         Map<String, Object> response = new HashMap<>();
         HttpHeaders httpHeaders = new HttpHeaders();
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("username", userPOJO.getUserName());
-        requestBody.put("password", userPOJO.getPassWord());
+        requestBody.put("password", userPOJO.getPassword());
 
         response = FabricUtils.getFabricResults(
                 FabricUtils.ContractName.Login.toString(),
@@ -151,15 +150,17 @@ public class UserController extends BaseController {
     }
 
     @GetMapping(value="/data/{id}")
-    public ResponseEntity<Map<String, Object>> getUserData(@PathVariable String id, @RequestBody UserPOJO userPOJO,Request req) throws Exception {
+    public ResponseEntity<Map<String, Object>> getUserData(@PathVariable String id, @RequestBody Map<String, String> allParam) throws Exception {
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("id", id);
+        String username = allParam.get("username");
+        String mspOrg = allParam.get("mspOrg");
 
         Map<String, Object>  response = FabricUtils.getFabricResults(
                 FabricUtils.ContractName.ReadEhr.toString(),
-                userPOJO.getUserName(),
-                userPOJO.getMspOrg(),
+                username,
+                mspOrg,
                 requestBody
         );
 
@@ -171,16 +172,16 @@ public class UserController extends BaseController {
                     requestBody.put("data", FabricUtils.permissionStatus.no.toString());
                     response = FabricUtils.getFabricResults(
                             FabricUtils.ContractName.ChangeData.toString(),
-                            userPOJO.getUserName(),
-                            userPOJO.getMspOrg(),
+                            username,
+                            mspOrg,
                             requestBody
                     );
                 } else {
                     requestBody.put("id", String.valueOf(resultObj.get("Key")));
                     response = FabricUtils.getFabricResults(
                             FabricUtils.ContractName.ReadEhr.toString(),
-                            userPOJO.getUserName(),
-                            userPOJO.getMspOrg(),
+                            username,
+                            mspOrg,
                             requestBody
                     );
                 }
