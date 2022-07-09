@@ -15,12 +15,12 @@ import java.util.Map;
 
 public class FabricUtils {
 
-    enum OrgMsp {
+    public enum OrgMsp {
         Org1MSP,
         Org2MSP
     }
 
-    enum ContractName {
+    public enum ContractName {
         Register,
         Login,
         CreateEhr,
@@ -51,7 +51,7 @@ public class FabricUtils {
         }
     }
 
-    public static String getNetworkConfigPath(String orgMsp) {
+    private static String getNetworkConfigPath(String orgMsp) {
         OrgMsp resultOrgMsp = OrgMsp.valueOf(orgMsp);
         String connectionPath;
         switch (resultOrgMsp) {
@@ -83,14 +83,14 @@ public class FabricUtils {
         return connectionPath;
     }
 
-    public static String getPasswordDigest (String password) throws NoSuchAlgorithmException {
+    private static String getPasswordDigest (String password) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] hash = digest.digest(
                 password.getBytes(StandardCharsets.UTF_8));
         return new String(Hex.encode(hash));
     }
 
-    public static Map<String, Object> contractFactory(Gateway gateway, String contractStringValue, Map<String, Object> requestResult) throws Exception {
+    private static Map<String, Object> contractFactory(Gateway gateway, String contractStringValue, Map<String, Object> requestResult) throws Exception {
 
         Network network = gateway.getNetwork(FabricNetworkConstants.wallet);
         Contract contract = network.getContract(FabricNetworkConstants.contractName);
