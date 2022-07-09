@@ -1,7 +1,9 @@
 package com.subsel.healthledger.core.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.subsel.healthledger.common.controller.BaseController;
 import com.subsel.healthledger.core.model.EhrPOJO;
+import com.subsel.healthledger.core.model.TicketPOJO;
 import com.subsel.healthledger.util.FabricUtils;
 import com.subsel.healthledger.util.TxnIdGeneretaror;
 
@@ -75,5 +77,47 @@ public class EhrController extends BaseController {
 
         HttpHeaders headers = new HttpHeaders();
         return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.OK);
+    }
+
+    @PostMapping(value="/ticket", produces = "application/json", consumes = "application/json")
+    public ResponseEntity<Map<String, Object>> getEhrDataWithTicket(@RequestBody TicketPOJO ticket, @RequestParam String username, @RequestParam String mspOrg) throws Exception {
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("id", ticket.getTicketId());
+
+        Map<String, Object>  response = FabricUtils.getFabricResults(
+                FabricUtils.ContractName.ReadEhr.toString(),
+                username,
+                mspOrg,
+                requestBody
+        );
+
+        JsonNode resultObj = (JsonNode) response.get("results");
+        String data = String.valueOf(resultObj.get("Data"));
+
+        if (data.equals(FabricUtils.permissionStatus.yes.toString())) {
+            if(Integer.parseInt(String.valueOf(resultObj.get("Maturity"))) < new Date().getTime()) {
+                requestBody.put("data", FabricUtils.permissionStatus.no.toString());
+                response = FabricUtils.getFabricResults(
+                        FabricUtils.ContractName.ChangeData.toString(),
+                        username,
+                        mspOrg,
+                        requestBody
+                );
+            } else {
+                requestBody.put("id", String.valueOf(resultObj.get("Key")));
+                response = FabricUtils.getFabricResults(
+                        FabricUtils.ContractName.ReadEhr.toString(),
+                        username,
+                        mspOrg,
+                        requestBody
+                );
+            }
+        } else {
+            response.put("message", "Permission denied");
+        }
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        return new ResponseEntity<>(response, httpHeaders, HttpStatus.OK);
     }
 }

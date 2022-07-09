@@ -61,6 +61,7 @@ public class UserController extends BaseController {
             response.put("message", message);
             return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.BAD_REQUEST);
         }
+
         User admin = new User() {
 
             @Override
@@ -167,45 +168,22 @@ public class UserController extends BaseController {
         return new ResponseEntity<>(response, httpHeaders, HttpStatus.OK);
     }
 
-    @PostMapping(value="/data/{token}")
-    public ResponseEntity<Map<String, Object>> getUserDataByToken(@PathVariable String token,@RequestParam String username, @RequestParam String mspOrg) throws Exception {
+    @GetMapping(value = "/{username}", produces = "application/json", consumes = "application/json")
+    public ResponseEntity<Map<String, Object>> userDetails(@PathVariable String username, @RequestParam String orgMsp) throws Exception {
+        Map<String, Object> response;
+        HttpHeaders httpHeaders = new HttpHeaders();
 
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("id", token);
+        requestBody.put("username", username);
 
-        Map<String, Object>  response = FabricUtils.getFabricResults(
-                FabricUtils.ContractName.ReadEhr.toString(),
+        response = FabricUtils.getFabricResults(
+                FabricUtils.ContractName.ReadUser.toString(),
                 username,
-                mspOrg,
+                orgMsp,
                 requestBody
         );
 
-        JsonNode resultObj = (JsonNode) response.get("results");
-        String data = String.valueOf(resultObj.get("Data"));
-
-        if (data.equals(FabricUtils.permissionStatus.yes.toString())) {
-                if(Integer.parseInt(String.valueOf(resultObj.get("Maturity"))) < new Date().getTime()) {
-                    requestBody.put("data", FabricUtils.permissionStatus.no.toString());
-                    response = FabricUtils.getFabricResults(
-                            FabricUtils.ContractName.ChangeData.toString(),
-                            username,
-                            mspOrg,
-                            requestBody
-                    );
-                } else {
-                    requestBody.put("id", String.valueOf(resultObj.get("Key")));
-                    response = FabricUtils.getFabricResults(
-                            FabricUtils.ContractName.ReadEhr.toString(),
-                            username,
-                            mspOrg,
-                            requestBody
-                    );
-                }
-            } else {
-                response.put("message", "Permission denied");
-            }
-
-        HttpHeaders httpHeaders = new HttpHeaders();
         return new ResponseEntity<>(response, httpHeaders, HttpStatus.OK);
     }
+
 }

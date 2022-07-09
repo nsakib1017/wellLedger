@@ -143,7 +143,7 @@ public class FabricUtils {
         JsonNode actualObj;
         ContractName contractName = ContractName.valueOf(contractStringValue);
 
-        switch (contractName){
+        switch (contractName) {
             case Register:
                 contract.submitTransaction(
                         contractName.toString(),
@@ -218,6 +218,7 @@ public class FabricUtils {
                 break;
 
             case GetAllUser:
+            case GetAllEhr:
                 result = contract.evaluateTransaction(
                         contractName.toString());
                 actualObj = mapper.readTree(new String(result));

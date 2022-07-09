@@ -76,7 +76,7 @@ public class AdminController extends BaseController {
         return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/getAllEhrr", produces = "application/json")
+    @GetMapping(value = "/getAllEhr", produces = "application/json")
     public ResponseEntity<Map<String, Object>> getAllEhr(@RequestParam String username, @RequestParam String orgMsp) throws Exception {
         // Create a CA client for interacting with the CA.
         Map<String, Object> response;
