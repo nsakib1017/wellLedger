@@ -206,11 +206,11 @@ public class FabricUtils {
                 response.put("results", actualObj);
                 break;
 
-            case ChangeData:
+            case DeleteTempEhr:
                 contract.submitTransaction(
                         contractName.toString(),
-                        requestResult.get("id").toString(),
-                        requestResult.get("data").toString());
+                        requestResult.get("id").toString()
+                );
                 response.put("message", "Permission revoked!!");
                 break;
 

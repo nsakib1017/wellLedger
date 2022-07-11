@@ -7,7 +7,6 @@ import com.subsel.healthledger.core.model.TicketPOJO;
 import com.subsel.healthledger.util.FabricUtils;
 import com.subsel.healthledger.util.TxnIdGeneretaror;
 
-import org.apache.commons.math3.distribution.TriangularDistribution;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,25 +21,25 @@ import java.util.Map;
 public class TicketController extends BaseController {
 
     @PostMapping(value = "/", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> createToken(@PathVariable String id, @RequestBody TicketPOJO ticketPojo) throws Exception {
+    public ResponseEntity<Map<String, Object>> createToken(@RequestBody TicketPOJO ticketPOJO) throws Exception {
 
         String pointer = TxnIdGeneretaror.generate();
-        String maturity = String.valueOf(60 * 1000 * Long.parseLong(ticketPojo.getLimit()));
-        String ehrId = TxnIdGeneretaror.generate();
-        String issued = String.valueOf(new Date().getTime());
+        long issued = new Date().getTime();
+        String maturity = String.valueOf(60 * 1000 * Long.parseLong(ticketPOJO.getLimit()) + issued);
+        String ehrId = ticketPOJO.getKey();
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("pointer", pointer);
         requestBody.put("key", ehrId);
-        requestBody.put("username", ticketPojo.getUname());
+        requestBody.put("username", ticketPOJO.getUname());
         requestBody.put("type", FabricUtils.dataType.permission);
         requestBody.put("data", FabricUtils.permissionStatus.yes);
-        requestBody.put("issued", issued);
+        requestBody.put("issued", String.valueOf(issued));
         requestBody.put("maturity", maturity);
 
         Map<String, Object> response = FabricUtils.getFabricResults(
                 FabricUtils.ContractName.CreateEhr.toString(),
-                ticketPojo.getUname(),
-                FabricUtils.OrgMsp.Org1MSP.toString(),
+                ticketPOJO.getUname(),
+                ticketPOJO.getOrgMsp(),
                 requestBody
         );
 
@@ -55,9 +54,9 @@ public class TicketController extends BaseController {
         requestBody.put("data", String.valueOf(FabricUtils.permissionStatus.no));
 
         Map<String, Object> response = FabricUtils.getFabricResults(
-                FabricUtils.ContractName.ChangeData.toString(),
+                FabricUtils.ContractName.DeleteTempEhr.toString(),
                 ticketPOJO.getUname(),
-                FabricUtils.OrgMsp.Org1MSP.toString(),
+                ticketPOJO.getOrgMsp(),
                 requestBody
         );
 
@@ -70,7 +69,7 @@ public class TicketController extends BaseController {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("id", ticketId);
 
-        Map<String, Object>  response = FabricUtils.getFabricResults(
+        Map<String, Object> response = FabricUtils.getFabricResults(
                 FabricUtils.ContractName.ReadEhr.toString(),
                 ticketPOJO.getUname(),
                 ticketPOJO.getOrgMsp(),
@@ -78,31 +77,26 @@ public class TicketController extends BaseController {
         );
 
         JsonNode resultObj = (JsonNode) response.get("results");
-        String data = String.valueOf(resultObj.get("Data"));
-        int oldMaturity = Integer.parseInt(String.valueOf(resultObj.get("Maturity")));
+        Long oldMaturity = Long.parseLong(String.valueOf(resultObj.get("Maturity")).replace("\"", ""));
 
-        if (data.equals(FabricUtils.permissionStatus.yes.toString())) {
-            if(oldMaturity < new Date().getTime()) {
-                requestBody.put("data", FabricUtils.permissionStatus.no.toString());
-                response = FabricUtils.getFabricResults(
-                        FabricUtils.ContractName.ChangeData.toString(),
-                        ticketPOJO.getUname(),
-                        ticketPOJO.getOrgMsp(),
-                        requestBody
-                );
-            } else {
-                oldMaturity = oldMaturity + Integer.parseInt(ticketPOJO.getLimit())*60*1000;
-                requestBody.put("maturity", String.valueOf(oldMaturity));
-                response = FabricUtils.getFabricResults(
-                        FabricUtils.ContractName.ReadEhr.toString(),
-                        ticketPOJO.getUname(),
-                        ticketPOJO.getOrgMsp(),
-                        requestBody
-                );
-            }
+        if (oldMaturity < new Date().getTime()) {
+            FabricUtils.getFabricResults(
+                    FabricUtils.ContractName.DeleteTempEhr.toString(),
+                    ticketPOJO.getUname(),
+                    ticketPOJO.getOrgMsp(),
+                    requestBody
+            );
         } else {
-            response.put("message", "Permission denied");
+            oldMaturity = oldMaturity + Long.parseLong(ticketPOJO.getLimit()) * 60 * 1000;
+            requestBody.put("maturity", String.valueOf(oldMaturity));
+            response = FabricUtils.getFabricResults(
+                    FabricUtils.ContractName.ExtendLimit.toString(),
+                    ticketPOJO.getUname(),
+                    ticketPOJO.getOrgMsp(),
+                    requestBody
+            );
         }
+
         HttpHeaders httpHeaders = new HttpHeaders();
         return new ResponseEntity<>(response, httpHeaders, HttpStatus.OK);
     }

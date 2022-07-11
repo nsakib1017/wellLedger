@@ -80,13 +80,13 @@ public class WellBeingDataController extends BaseController {
         return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.OK);
     }
 
-    @PostMapping(value="/ticket", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<Map<String, Object>> getEhrDataWithTicket(@RequestBody TicketPOJO ticket, @RequestParam String username, @RequestParam String mspOrg) throws Exception {
+    @PostMapping(value = "/ticket/{ticketId}", produces = "application/json", consumes = "application/json")
+    public ResponseEntity<Map<String, Object>> getEhrDataWithTicket(@PathVariable String ticketId,@RequestBody TicketPOJO ticket, @RequestParam String username, @RequestParam String mspOrg) throws Exception {
 
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("id", ticket.getTicketId());
+        requestBody.put("id", ticketId);
 
-        Map<String, Object>  response = FabricUtils.getFabricResults(
+        Map<String, Object> response = FabricUtils.getFabricResults(
                 FabricUtils.ContractName.ReadEhr.toString(),
                 username,
                 mspOrg,
@@ -94,28 +94,22 @@ public class WellBeingDataController extends BaseController {
         );
 
         JsonNode resultObj = (JsonNode) response.get("results");
-        String data = String.valueOf(resultObj.get("Data"));
 
-        if (data.equals(FabricUtils.permissionStatus.yes.toString())) {
-            if(Integer.parseInt(String.valueOf(resultObj.get("Maturity"))) < new Date().getTime()) {
-                requestBody.put("data", FabricUtils.permissionStatus.no.toString());
-                response = FabricUtils.getFabricResults(
-                        FabricUtils.ContractName.ChangeData.toString(),
-                        username,
-                        mspOrg,
-                        requestBody
-                );
-            } else {
-                requestBody.put("id", String.valueOf(resultObj.get("Key")));
-                response = FabricUtils.getFabricResults(
-                        FabricUtils.ContractName.ReadEhr.toString(),
-                        username,
-                        mspOrg,
-                        requestBody
-                );
-            }
+        if (Long.parseLong(String.valueOf(resultObj.get("Maturity")).replace("\"", "")) < new Date().getTime()) {
+                FabricUtils.getFabricResults(
+                    FabricUtils.ContractName.DeleteTempEhr.toString(),
+                    username,
+                    mspOrg,
+                    requestBody
+            );
         } else {
-            response.put("message", "Permission denied");
+            requestBody.put("id", String.valueOf(resultObj.get("Key")).replace("\"",""));
+            response = FabricUtils.getFabricResults(
+                    FabricUtils.ContractName.ReadEhr.toString(),
+                    username,
+                    mspOrg,
+                    requestBody
+            );
         }
 
         HttpHeaders httpHeaders = new HttpHeaders();

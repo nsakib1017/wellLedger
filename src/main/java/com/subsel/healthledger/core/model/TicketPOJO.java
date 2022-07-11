@@ -8,5 +8,4 @@ public class TicketPOJO {
     private final String uname;
     private final String orgMsp;
     private final String key;
-    private final String ticketId;
 }
