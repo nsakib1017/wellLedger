@@ -6,6 +6,7 @@ import com.subsel.healthledger.core.model.EhrPOJO;
 import com.subsel.healthledger.core.model.TicketPOJO;
 
 import com.subsel.healthledger.util.FabricUtils;
+import com.subsel.healthledger.util.IpfsClientUtils;
 import com.subsel.healthledger.util.TxnIdGeneretaror;
 
 import org.springframework.http.HttpHeaders;
@@ -13,15 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import java.nio.file.Paths;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RestController
 @RequestMapping(path = "/api/wellBeing")
@@ -34,20 +29,15 @@ public class WellBeingDataController extends BaseController {
         String issued = String.valueOf(new Date().getTime());
         String ehrDataString = FabricUtils.getWellBeingStringData(ehrPOJO);
 
-        Path path = Paths.get("wellBeingData.txt");
         byte[] strToBytes = ehrDataString.getBytes();
-
-        Files.write(path, strToBytes);
-
-        String read = Files.readAllLines(path).get(0);
-        assertEquals(ehrDataString, read);
+        String qmHash = IpfsClientUtils.getContentCid(strToBytes);
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("pointer", ehrId);
         requestBody.put("key", ehrId);
         requestBody.put("username", ehrPOJO.getUname());
         requestBody.put("type", FabricUtils.dataType.wellBeing);
-        requestBody.put("data", ehrDataString);
+        requestBody.put("data", qmHash);
         requestBody.put("issued", issued);
         requestBody.put("maturity", "N/A");
 
