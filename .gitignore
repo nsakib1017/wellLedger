@@ -15,4 +15,5 @@ coverage
 jspm_packages/
 package-lock.json
 bin
+wellBeingData.txt
 
