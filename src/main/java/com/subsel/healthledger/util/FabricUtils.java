@@ -2,6 +2,7 @@ package com.subsel.healthledger.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.subsel.healthledger.core.model.EhrPOJO;
 import org.hyperledger.fabric.gateway.*;
 import org.springframework.security.crypto.codec.Hex;
 
@@ -128,6 +129,11 @@ public class FabricUtils {
                 affiliation = "";
         }
         return affiliation;
+    }
+
+    public static String getWellBeingStringData (EhrPOJO ehrPOJO) {
+        return String.format("username => %s | type => %s | steps => %s | calorie => %s | sleep => %s | date => %s | heartRate => %s | orgMSP => %s",
+                ehrPOJO.getUname(), ehrPOJO.getType(), ehrPOJO.getStepsCount(), ehrPOJO.getCalorieBurnt(), ehrPOJO.getSleepTime(), ehrPOJO.getDate(), ehrPOJO.getHeartRate(), ehrPOJO.getOrgMsp());
     }
 
     private static String getPasswordDigest (String password) throws NoSuchAlgorithmException {
