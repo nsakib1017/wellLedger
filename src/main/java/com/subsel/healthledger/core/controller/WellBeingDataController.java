@@ -107,15 +107,9 @@ public class WellBeingDataController extends BaseController {
                     username,
                     mspOrg,
                     requestBody
-            );
-        } else {
-            requestBody.put("id", String.valueOf(resultObj.get("Key")).replace("\"",""));
-            response = FabricUtils.getFabricResults(
-                    FabricUtils.ContractName.ReadEhr.toString(),
-                    username,
-                    mspOrg,
-                    requestBody
-            );
+                );
+                response.clear();
+                response.put("message", "Ticket expired");
         }
 
         HttpHeaders httpHeaders = new HttpHeaders();

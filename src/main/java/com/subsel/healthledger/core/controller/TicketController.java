@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.subsel.healthledger.common.controller.BaseController;
 import com.subsel.healthledger.core.model.TicketPOJO;
 import com.subsel.healthledger.util.FabricUtils;
+import com.subsel.healthledger.util.IpfsClientUtils;
 import com.subsel.healthledger.util.TxnIdGeneretaror;
 
 import org.springframework.http.HttpHeaders;
@@ -28,11 +29,25 @@ public class TicketController extends BaseController {
         String maturity = String.valueOf(60 * 1000 * Long.parseLong(ticketPOJO.getLimit()) + issued);
         String ehrId = ticketPOJO.getKey();
         Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("id", ticketPOJO.getKey());
+
+        Map<String, Object> pointerData = FabricUtils.getFabricResults(
+                FabricUtils.ContractName.ReadEhr.toString(),
+                ticketPOJO.getUname(),
+                ticketPOJO.getOrgMsp(),
+                requestBody
+        );
+        requestBody.clear();
         requestBody.put("pointer", pointer);
         requestBody.put("key", ehrId);
         requestBody.put("username", ticketPOJO.getUname());
         requestBody.put("type", FabricUtils.dataType.permission);
-        requestBody.put("data", FabricUtils.permissionStatus.yes);
+
+        JsonNode pointerDataObj = (JsonNode) pointerData.get("results");
+        String pointerQmHash = String.valueOf(pointerDataObj.get("Data")).replace("\"", "");
+        String pointerDataAsString = IpfsClientUtils.getContentFromCid(pointerQmHash);
+
+        requestBody.put("data", pointerDataAsString);
         requestBody.put("issued", String.valueOf(issued));
         requestBody.put("maturity", maturity);
 
