@@ -54,7 +54,7 @@ public class AdminController extends BaseController {
 
         response.put("message", "Successfully enrolled user \"admin\" and imported it into the wallet");
         HttpHeaders headers = new HttpHeaders();
-        return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.OK);
+        return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.CREATED);
     }
 
     @GetMapping(value = "/getAllUser", produces = "application/json")
