@@ -12,6 +12,7 @@ Get HealthLedger DApp up and running.
 
 * Java : openjdk 11.0.6
 * Build Tool : gradle 6.0.1
+* PostgreSql 12
 
 ### Build ###
 
