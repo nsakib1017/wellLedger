@@ -25,8 +25,14 @@ Get HealthLedger DApp up and running.
 The link to Hyperledger fabric bin files used for the network is,
 https://drive.google.com/drive/folders/16HkyMHWTRZV8dh_V_GSxg_Bf1N3bsi1S?usp=sharing
 
-Copy the contents of this folder and add them to **bin** directory of the **fabricnetwork** module.
+Copy the contents of this folder and add them to **bin** directory of the **fabricnetwork** module. Also, you need to create a database using `postgresql` and map the settings in `application.yml` file (You can also create a `application-dev.yml` file if iou want to). 
 
 To launch the application, run it as a SpringBoot project using the command:
 
     gradle bootRun
+
+
+#### Launching the Fabric Network
+
+Change directory to the `fabricnetwork` module and open the terminal and run `./startFabric.sh`. 
+Consequently, to tear down the network run `./networkDown.sh`. After that, delete the contents of the `wallet` folder.
