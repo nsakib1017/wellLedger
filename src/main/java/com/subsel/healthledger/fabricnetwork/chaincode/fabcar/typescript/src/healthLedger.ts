@@ -66,11 +66,9 @@ export class HealthLedgerContract extends Contract {
         const userString = await this.ReadUser(ctx, username);
         const user = JSON.parse(userString);
         if(user.length !== 0 && user.Password === password){
-            const datumString = await this.ReadUser(ctx, username);
-            const datum = JSON.parse(datumString);
-            datum.LoggedIn = true;
-            await ctx.stub.putState(username, Buffer.from(JSON.stringify(datum)));
-            return JSON.stringify(datum);
+            user.LoggedIn = true;
+            await ctx.stub.putState(username, Buffer.from(JSON.stringify(user)));
+            return JSON.stringify(user);
         } else {
             return new Error(`The user ${username} does not exist`)
         }
