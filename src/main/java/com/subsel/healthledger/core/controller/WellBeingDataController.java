@@ -61,7 +61,7 @@ public class WellBeingDataController extends BaseController {
         return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.CREATED);
     }
 
-    @GetMapping(value = "/getAllWellBeingDataByUser", produces = "application/json")
+    @GetMapping(value = "/byUser", produces = "application/json")
     public ResponseEntity<Map<String, Object>> getAllWellBeingDataByUser(@RequestParam String username, @RequestParam String orgMsp) throws Exception {
 
         Map<String, Object> requestBody = new HashMap<>();
