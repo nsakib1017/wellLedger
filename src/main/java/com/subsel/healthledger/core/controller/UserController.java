@@ -129,8 +129,8 @@ public class UserController extends BaseController {
         return new ResponseEntity<>(response, httpHeaders, HttpStatus.CREATED);
     }
 
-    @PostMapping(value = "/login", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody UserPOJO userPOJO) throws Exception {
+    @PostMapping(value = "/logIn", produces = "application/json", consumes = "application/json")
+    public ResponseEntity<Map<String, Object>> logInUser(@RequestBody UserPOJO userPOJO) throws Exception {
         Map<String, Object> response;
         HttpHeaders httpHeaders = new HttpHeaders();
 
