@@ -110,7 +110,7 @@ public class WellBeingDataController extends BaseController {
         return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.OK);
     }
 
-    @PostMapping(value = "/ticket/{ticketId}", produces = "application/json", consumes = "application/json")
+    @PostMapping(value = "/ticket/{ticketId}", produces = "application/json")
     public ResponseEntity<Map<String, Object>> getWellBeingDataWithTicket(@PathVariable String ticketId, @RequestParam String username, @RequestParam String mspOrg) throws Exception {
 
         Map<String, Object> requestBody = new HashMap<>();
