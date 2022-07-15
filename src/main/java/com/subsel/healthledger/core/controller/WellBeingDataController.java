@@ -3,7 +3,6 @@ package com.subsel.healthledger.core.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.subsel.healthledger.common.controller.BaseController;
 import com.subsel.healthledger.core.model.EhrPOJO;
-import com.subsel.healthledger.core.model.TicketPOJO;
 
 import com.subsel.healthledger.util.FabricUtils;
 import com.subsel.healthledger.util.IpfsClientUtils;
