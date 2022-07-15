@@ -142,7 +142,7 @@ public class UserController extends BaseController {
         requestBody.put("password", userPOJO.getPassword());
 
         response = FabricUtils.getFabricResults(
-                FabricUtils.ContractName.Login.toString(),
+                FabricUtils.ContractName.LogIn.toString(),
                 userPOJO.getUserName(),
                 userPOJO.getMspOrg(),
                 requestBody
@@ -159,7 +159,7 @@ public class UserController extends BaseController {
         requestBody.put("username", userPOJO.getUserName());
 
         response = FabricUtils.getFabricResults(
-                FabricUtils.ContractName.Logout.toString(),
+                FabricUtils.ContractName.LogOut.toString(),
                 userPOJO.getUserName(),
                 userPOJO.getMspOrg(),
                 requestBody

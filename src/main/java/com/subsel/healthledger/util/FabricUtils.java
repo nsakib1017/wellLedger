@@ -36,7 +36,7 @@ public class FabricUtils {
 
     public enum ContractName {
         Register,
-        Login,
+        LogIn,
         CreateEhr,
         ReadEhr,
         ReadUser,
@@ -49,7 +49,7 @@ public class FabricUtils {
         GetAllUser,
         GetAllEhrByUser,
         UserIsLoggedIn,
-        Logout
+        LogOut
     }
 
     public static Map<String, Object> getFabricResults(String contractName, String userName, String orgMsp, Map<String, Object> contractBody) throws Exception {
@@ -168,7 +168,7 @@ public class FabricUtils {
                 response.put("message", "User registered");
                 break;
 
-            case Login:
+            case LogIn:
                 contract.submitTransaction(
                         contractName.toString(),
                         requestResult.get("username").toString(),
@@ -177,7 +177,7 @@ public class FabricUtils {
                 response.put("message", "Login Successful");
                 break;
 
-            case Logout:
+            case LogOut:
                 contract.submitTransaction(
                         contractName.toString(),
                         requestResult.get("username").toString()

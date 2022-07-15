@@ -62,7 +62,7 @@ export class HealthLedgerContract extends Contract {
     }
 
     @Transaction()
-    public async Login(ctx: Context, username: string, password: string){
+    public async LogIn(ctx: Context, username: string, password: string){
         const userString = await this.ReadUser(ctx, username);
         const user = JSON.parse(userString);
         if(user.length !== 0 && user.Password === password){
