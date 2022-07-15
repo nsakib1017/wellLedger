@@ -2,7 +2,7 @@ package com.subsel.healthledger.core.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.subsel.healthledger.common.controller.BaseController;
-import com.subsel.healthledger.core.model.EhrPOJO;
+import com.subsel.healthledger.core.model.WellBeingPOJO;
 
 import com.subsel.healthledger.util.FabricUtils;
 import com.subsel.healthledger.util.IpfsClientUtils;
@@ -23,13 +23,13 @@ import java.util.Map;
 public class WellBeingDataController extends BaseController {
 
     @PostMapping(value = "/", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> createEhr(@RequestBody EhrPOJO ehrPOJO) throws Exception {
+    public ResponseEntity<Map<String, Object>> createEhr(@RequestBody WellBeingPOJO wellBeingPOJO) throws Exception {
 
         Map<String, Object> requestBody = new HashMap<>();
         Map<String, Object> response = new HashMap<>();
         HttpHeaders headers = new HttpHeaders();
 
-        boolean isLoggedIn = UserUtils.userLoggedIn(ehrPOJO.getUname(), ehrPOJO.getOrgMsp());
+        boolean isLoggedIn = UserUtils.userLoggedIn(wellBeingPOJO.getUname(), wellBeingPOJO.getOrgMsp());
 
         if(!isLoggedIn){
             response.put("message", "Please Login First");
@@ -38,12 +38,12 @@ public class WellBeingDataController extends BaseController {
 
         String ehrId = TxnIdGeneretaror.generate();
         String issued = String.valueOf(new Date().getTime());
-        String ehrDataString = FabricUtils.getWellBeingStringData(ehrPOJO);
+        String ehrDataString = FabricUtils.getWellBeingStringData(wellBeingPOJO);
 
         byte[] strToBytes = ehrDataString.getBytes();
         String qmHash = IpfsClientUtils.getContentCid(strToBytes);
 
-        requestBody.put("username", ehrPOJO.getUname());
+        requestBody.put("username", wellBeingPOJO.getUname());
         requestBody.put("pointer", ehrId);
         requestBody.put("key", ehrId);
         requestBody.put("type", FabricUtils.dataType.wellBeing);
@@ -53,8 +53,8 @@ public class WellBeingDataController extends BaseController {
 
         response = FabricUtils.getFabricResults(
                 FabricUtils.ContractName.CreateEhr.toString(),
-                ehrPOJO.getUname(),
-                ehrPOJO.getOrgMsp(),
+                wellBeingPOJO.getUname(),
+                wellBeingPOJO.getOrgMsp(),
                 requestBody
         );
 

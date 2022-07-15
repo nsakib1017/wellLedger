@@ -3,7 +3,7 @@ package com.subsel.healthledger.core.model;
 import lombok.Data;
 
 @Data
-public class EhrPOJO {
+public class WellBeingPOJO {
     private final String uname;
     private final String type;
     private final String stepsCount;
