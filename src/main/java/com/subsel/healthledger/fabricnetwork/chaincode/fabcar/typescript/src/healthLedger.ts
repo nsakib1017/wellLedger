@@ -61,26 +61,24 @@ export class HealthLedgerContract extends Contract {
         await ctx.stub.putState(username, Buffer.from(JSON.stringify(user)));
     }
 
-    @Transaction(false)
+    @Transaction()
     public async Login(ctx: Context, username: string, password: string){
         const userString = await this.ReadUser(ctx, username);
         const user = JSON.parse(userString);
         if(user.length !== 0 && user.Password === password){
             user.LoggedIn = true;
             await ctx.stub.putState(username, Buffer.from(JSON.stringify(user)));
-            return JSON.stringify(user);
         } else {
-            return new Error(`The user ${username} does not exist`)
+            throw new Error(`The credentials does not match`)
         }
     }
 
-    @Transaction(false)
+    @Transaction()
     public async LogOut(ctx: Context, username: string){
         const userString = await this.ReadUser(ctx, username);
         const user = JSON.parse(userString);
         user.LoggedIn = false;
         await ctx.stub.putState(username, Buffer.from(JSON.stringify(user)));
-        return JSON.stringify(user);
     }
 
     // CreateAsset issues a new asset to the world state with given details.
@@ -147,6 +145,14 @@ export class HealthLedgerContract extends Contract {
     public async UserExists(ctx: Context, username: string): Promise<boolean> {
         const userJSON = await ctx.stub.getState(username);
         return userJSON && userJSON.length > 0;
+    }
+
+    @Transaction(false)
+    @Returns('boolean')
+    public async UserIsLoggedIn(ctx: Context, username: string): Promise<boolean> {
+        const userString = await this.ReadUser(ctx, username);
+        const user = JSON.parse(userString);
+        return user.LoggedIn ? user.LoggedIn : false;
     }
 
     // TransferAsset updates the owner field of asset with given id in the world state.

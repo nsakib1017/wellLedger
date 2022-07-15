@@ -8,6 +8,7 @@ import com.subsel.healthledger.util.FabricUtils;
 import com.subsel.healthledger.util.IpfsClientUtils;
 import com.subsel.healthledger.util.TxnIdGeneretaror;
 
+import com.subsel.healthledger.util.UserUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +25,21 @@ public class TicketController extends BaseController {
     @PostMapping(value = "/", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Map<String, Object>> createToken(@RequestBody TicketPOJO ticketPOJO) throws Exception {
 
+        Map<String, Object> requestBody = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
+        HttpHeaders headers = new HttpHeaders();
+
+        boolean isLoggedIn = UserUtils.userLoggedIn(ticketPOJO.getUname(), ticketPOJO.getOrgMsp());
+
+        if(!isLoggedIn){
+            response.put("message", "Please Login First");
+            return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.UNAUTHORIZED);
+        }
+
         String pointer = TxnIdGeneretaror.generate();
         long issued = new Date().getTime();
         String maturity = String.valueOf(60 * 1000 * Long.parseLong(ticketPOJO.getLimit()) + issued);
         String ehrId = ticketPOJO.getKey();
-        Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("id", ticketPOJO.getKey());
 
         Map<String, Object> pointerData = FabricUtils.getFabricResults(
@@ -51,40 +62,56 @@ public class TicketController extends BaseController {
         requestBody.put("issued", String.valueOf(issued));
         requestBody.put("maturity", maturity);
 
-        Map<String, Object> response = FabricUtils.getFabricResults(
+        response = FabricUtils.getFabricResults(
                 FabricUtils.ContractName.CreateEhr.toString(),
                 ticketPOJO.getUname(),
                 ticketPOJO.getOrgMsp(),
                 requestBody
         );
 
-        HttpHeaders headers = new HttpHeaders();
         return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.CREATED);
     }
 
     @PostMapping(value = "/revoke/{ticketId}", produces = "application/json", consumes = "application/json")
     public ResponseEntity<Map<String, Object>> revokePermission(@PathVariable String ticketId, @RequestBody TicketPOJO ticketPOJO) throws Exception {
         Map<String, Object> requestBody = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
+        HttpHeaders headers = new HttpHeaders();
+
+        boolean isLoggedIn = UserUtils.userLoggedIn(ticketPOJO.getUname(), ticketPOJO.getOrgMsp());
+
+        if(!isLoggedIn){
+            response.put("message", "Please Login First");
+            return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.UNAUTHORIZED);
+        }
         requestBody.put("id", ticketId);
         requestBody.put("data", String.valueOf(FabricUtils.permissionStatus.no));
 
-        Map<String, Object> response = FabricUtils.getFabricResults(
+        response = FabricUtils.getFabricResults(
                 FabricUtils.ContractName.DeleteTempEhr.toString(),
                 ticketPOJO.getUname(),
                 ticketPOJO.getOrgMsp(),
                 requestBody
         );
 
-        HttpHeaders headers = new HttpHeaders();
         return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.OK);
     }
 
     @PostMapping(value = "/extend/{ticketId}", produces = "application/json", consumes = "application/json")
     public ResponseEntity<Map<String, Object>> extendPermission(@PathVariable String ticketId, @RequestBody TicketPOJO ticketPOJO) throws Exception {
         Map<String, Object> requestBody = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
+        HttpHeaders headers = new HttpHeaders();
+
+        boolean isLoggedIn = UserUtils.userLoggedIn(ticketPOJO.getUname(), ticketPOJO.getOrgMsp());
+
+        if(!isLoggedIn){
+            response.put("message", "Please Login First");
+            return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.UNAUTHORIZED);
+        }
         requestBody.put("id", ticketId);
 
-        Map<String, Object> response = FabricUtils.getFabricResults(
+        response = FabricUtils.getFabricResults(
                 FabricUtils.ContractName.ReadEhr.toString(),
                 ticketPOJO.getUname(),
                 ticketPOJO.getOrgMsp(),
@@ -112,7 +139,6 @@ public class TicketController extends BaseController {
             );
         }
 
-        HttpHeaders httpHeaders = new HttpHeaders();
-        return new ResponseEntity<>(response, httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(response, headers, HttpStatus.OK);
     }
 }

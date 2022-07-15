@@ -6,6 +6,7 @@ import com.subsel.healthledger.common.controller.BaseController;
 import com.subsel.healthledger.core.model.UserPOJO;
 import com.subsel.healthledger.util.FabricNetworkConstants;
 import com.subsel.healthledger.util.FabricUtils;
+import com.subsel.healthledger.util.UserUtils;
 import okhttp3.Request;
 import org.hyperledger.fabric.gateway.*;
 
@@ -133,7 +134,7 @@ public class UserController extends BaseController {
 
     @PostMapping(value = "/login", produces = "application/json", consumes = "application/json")
     public ResponseEntity<Map<String, Object>> loginUser(@RequestBody UserPOJO userPOJO) throws Exception {
-        Map<String, Object> response = new HashMap<>();
+        Map<String, Object> response;
         HttpHeaders httpHeaders = new HttpHeaders();
 
         Map<String, Object> requestBody = new HashMap<>();
@@ -150,12 +151,37 @@ public class UserController extends BaseController {
         return new ResponseEntity<>(response, httpHeaders, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/{username}", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> userDetails(@PathVariable String username, @RequestParam String orgMsp) throws Exception {
+    @PostMapping(value = "/logOut", produces = "application/json", consumes = "application/json")
+    public ResponseEntity<Map<String, Object>> logOutUser(@RequestBody UserPOJO userPOJO) throws Exception {
         Map<String, Object> response;
         HttpHeaders httpHeaders = new HttpHeaders();
-
         Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("username", userPOJO.getUserName());
+
+        response = FabricUtils.getFabricResults(
+                FabricUtils.ContractName.Logout.toString(),
+                userPOJO.getUserName(),
+                userPOJO.getMspOrg(),
+                requestBody
+        );
+
+        return new ResponseEntity<>(response, httpHeaders, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/{username}", produces = "application/json")
+    public ResponseEntity<Map<String, Object>> userDetails(@PathVariable String username, @RequestParam String orgMsp) throws Exception {
+
+        Map<String, Object> response = new HashMap<>();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        Map<String, Object> requestBody = new HashMap<>();
+
+        boolean isLoggedIn = UserUtils.userLoggedIn(username, orgMsp);
+
+        if(!isLoggedIn){
+            response.put("message", "Please Login First");
+            return new ResponseEntity<Map<String, Object>>(response, httpHeaders, HttpStatus.UNAUTHORIZED);
+        }
+
         requestBody.put("username", username);
 
         response = FabricUtils.getFabricResults(

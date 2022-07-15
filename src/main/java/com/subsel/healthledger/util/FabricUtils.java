@@ -47,7 +47,9 @@ public class FabricUtils {
         ExtendLimit,
         GetAllEhr,
         GetAllUser,
-        GetAllEhrByUser
+        GetAllEhrByUser,
+        UserIsLoggedIn,
+        Logout
     }
 
     public static Map<String, Object> getFabricResults(String contractName, String userName, String orgMsp, Map<String, Object> contractBody) throws Exception {
@@ -167,16 +169,20 @@ public class FabricUtils {
                 break;
 
             case Login:
-                result = contract.evaluateTransaction(
+                contract.submitTransaction(
                         contractName.toString(),
                         requestResult.get("username").toString(),
                         getPasswordDigest(requestResult.get("password").toString())
                 );
-                actualObj = mapper.readTree(new String(result));
-                if (!actualObj.get("Username").toString().isEmpty())
-                    response.put("message", "Login Successful");
-                else
-                    response.put("message", "Login Failed");
+                response.put("message", "Login Successful");
+                break;
+
+            case Logout:
+                contract.submitTransaction(
+                        contractName.toString(),
+                        requestResult.get("username").toString()
+                );
+                response.put("message", "Logout Successful");
                 break;
 
             case CreateEhr:
@@ -195,6 +201,7 @@ public class FabricUtils {
 
             case GetAllEhrByUser:
             case ReadUser:
+            case UserIsLoggedIn:
                 result = contract.evaluateTransaction(
                         contractName.toString(),
                         requestResult.get("username").toString()
