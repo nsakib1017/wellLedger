@@ -37,17 +37,17 @@ public class FabricUtils {
     public enum ContractName {
         Register,
         LogIn,
-        CreateEhr,
-        ReadEhr,
+        CreateWellBeingData,
+        ReadWellBeingData,
         ReadUser,
-        DeleteTempEhr,
-        EhrExists,
+        DeleteTempWellBeingData,
+        WellBeingDataExists,
         ChangeData,
         UserExists,
         ExtendLimit,
-        GetAllEhr,
+        GetAllWellBeingData,
         GetAllUser,
-        GetAllEhrByUser,
+        GetAllWellBeingDataByUser,
         UserIsLoggedIn,
         LogOut
     }
@@ -185,7 +185,7 @@ public class FabricUtils {
                 response.put("message", "Logout Successful");
                 break;
 
-            case CreateEhr:
+            case CreateWellBeingData:
                  contract.submitTransaction(
                         contractName.toString(),
                         requestResult.get("pointer").toString(),
@@ -196,10 +196,10 @@ public class FabricUtils {
                         requestResult.get("issued").toString(),
                         requestResult.get("maturity").toString()
                 );
-                response.put("ehrData", requestResult.get("pointer").toString());
+                response.put("wellBeingData", requestResult.get("pointer").toString());
                 break;
 
-            case GetAllEhrByUser:
+            case GetAllWellBeingDataByUser:
             case ReadUser:
             case UserIsLoggedIn:
                 result = contract.evaluateTransaction(
@@ -210,7 +210,7 @@ public class FabricUtils {
                 response.put("results", actualObj);
                 break;
 
-            case ReadEhr:
+            case ReadWellBeingData:
                 result = contract.evaluateTransaction(
                         contractName.toString(),
                         requestResult.get("id").toString()
@@ -219,7 +219,7 @@ public class FabricUtils {
                 response.put("results", actualObj);
                 break;
 
-            case DeleteTempEhr:
+            case DeleteTempWellBeingData:
                 contract.submitTransaction(
                         contractName.toString(),
                         requestResult.get("id").toString()
@@ -236,7 +236,7 @@ public class FabricUtils {
                 break;
 
             case GetAllUser:
-            case GetAllEhr:
+            case GetAllWellBeingData:
                 result = contract.evaluateTransaction(
                         contractName.toString());
                 actualObj = mapper.readTree(new String(result));

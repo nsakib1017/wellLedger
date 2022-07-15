@@ -83,13 +83,13 @@ export class HealthLedgerContract extends Contract {
 
     // CreateAsset issues a new asset to the world state with given details.
     @Transaction()
-    public async CreateEhr(ctx: Context, id: string, key: string, uname:string, type: string, data: string, issued: string, maturity: string): Promise<void> {
-        const exists = await this.EhrExists(ctx, id);
+    public async CreateWellBeingData(ctx: Context, id: string, key: string, uname:string, type: string, data: string, issued: string, maturity: string): Promise<void> {
+        const exists = await this.WellBeingDataExists(ctx, id);
         if (exists) {
             throw new Error(`The asset ${id} already exists`);
         }
 
-        const ehrData: Data = {
+        const wellBeingData: Data = {
             docType: "data",
             ID: id,
             Key: key,
@@ -99,17 +99,17 @@ export class HealthLedgerContract extends Contract {
             Issued: issued,
             Maturity: maturity
         };
-        await ctx.stub.putState(id, Buffer.from(JSON.stringify(ehrData)));
+        await ctx.stub.putState(id, Buffer.from(JSON.stringify(wellBeingData)));
     }
 
     // ReadAsset returns the asset stored in the world state with given id.
     @Transaction(false)
-    public async ReadEhr(ctx: Context, id: string): Promise<string> {
-        const ehrJSON = await ctx.stub.getState(id); // get the asset from chaincode state
-        if (!ehrJSON || ehrJSON.length === 0) {
-            throw new Error(`The ehr ${id} does not exist`);
+    public async ReadWellBeingData(ctx: Context, id: string): Promise<string> {
+        const wellBeinfJSON = await ctx.stub.getState(id); // get the asset from chaincode state
+        if (!wellBeinfJSON || wellBeinfJSON.length === 0) {
+            throw new Error(`The wellbeing ${id} does not exist`);
         }
-        return ehrJSON.toString();
+        return wellBeinfJSON.toString();
     }
 
     // ReadAsset returns the asset stored in the world state with given id.
@@ -124,8 +124,8 @@ export class HealthLedgerContract extends Contract {
 
     // DeleteAsset deletes an given asset from the world state.
     @Transaction()
-    public async DeleteTempEhr(ctx: Context, id: string): Promise<void> {
-        const exists = await this.EhrExists(ctx, id);
+    public async DeleteTempWellBeingData(ctx: Context, id: string): Promise<void> {
+        const exists = await this.WellBeingDataExists(ctx, id);
         if (!exists) {
             throw new Error(`The asset ${id} does not exist`);
         }
@@ -135,9 +135,9 @@ export class HealthLedgerContract extends Contract {
     // AssetExists returns true when asset with given ID exists in world state.
     @Transaction(false)
     @Returns('boolean')
-    public async EhrExists(ctx: Context, id: string): Promise<boolean> {
-        const ehrJSON = await ctx.stub.getState(id);
-        return ehrJSON && ehrJSON.length > 0;
+    public async WellBeingDataExists(ctx: Context, id: string): Promise<boolean> {
+        const wellBeingJSON = await ctx.stub.getState(id);
+        return wellBeingJSON && wellBeingJSON.length > 0;
     }
 
     @Transaction(false)
@@ -157,17 +157,8 @@ export class HealthLedgerContract extends Contract {
 
     // TransferAsset updates the owner field of asset with given id in the world state.
     @Transaction()
-    public async ChangeData(ctx: Context, id: string, data: string): Promise<void> {
-        const datumString = await this.ReadEhr(ctx, id);
-        const datum = JSON.parse(datumString);
-        datum.Data = data;
-        await ctx.stub.putState(id, Buffer.from(JSON.stringify(datum)));
-    }
-
-    // TransferAsset updates the owner field of asset with given id in the world state.
-    @Transaction()
     public async ExtendLimit(ctx: Context, id: string, maturity: string): Promise<void> {
-        const datumString = await this.ReadEhr(ctx, id);
+        const datumString = await this.ReadWellBeingData(ctx, id);
         const datum = JSON.parse(datumString);
         datum.Maturity = maturity;
         await ctx.stub.putState(id, Buffer.from(JSON.stringify(datum)));
@@ -176,7 +167,7 @@ export class HealthLedgerContract extends Contract {
     // GetAllAssets returns all assets found in the world state.
     @Transaction(false)
     @Returns('string')
-    public async GetAllEhrByUser(ctx: Context, uname: string): Promise<string> {
+    public async GetAllWellBeingDataByUser(ctx: Context, uname: string): Promise<string> {
         const allResults = [];
         // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
         // const query = `{"selector":{"docType":"user", "uname": "${uname}"}`
@@ -205,7 +196,7 @@ export class HealthLedgerContract extends Contract {
 
     @Transaction(false)
     @Returns('string')
-    public async GetAllEhr(ctx: Context): Promise<string> {
+    public async GetAllWellBeingData(ctx: Context): Promise<string> {
         const allResults = [];
         // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
         // const query = `{"selector":{"docType":"user", "uname": "${uname}"}`

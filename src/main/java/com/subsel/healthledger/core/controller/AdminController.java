@@ -74,15 +74,15 @@ public class AdminController extends BaseController {
         return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/getAllEhr", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> getAllEhr(@RequestParam String username, @RequestParam String orgMsp) throws Exception {
+    @GetMapping(value = "/getAllWellBeingData", produces = "application/json")
+    public ResponseEntity<Map<String, Object>> getAllWellBeingData(@RequestParam String username, @RequestParam String orgMsp) throws Exception {
         // Create a CA client for interacting with the CA.
         Map<String, Object> response;
 
         Map<String, Object> requestBody = new HashMap<>();
 
         response = FabricUtils.getFabricResults(
-                FabricUtils.ContractName.GetAllEhr.toString(),
+                FabricUtils.ContractName.GetAllWellBeingData.toString(),
                 username,
                 orgMsp,
                 requestBody

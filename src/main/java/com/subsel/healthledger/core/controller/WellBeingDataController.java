@@ -23,7 +23,7 @@ import java.util.Map;
 public class WellBeingDataController extends BaseController {
 
     @PostMapping(value = "/", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> createEhr(@RequestBody WellBeingPOJO wellBeingPOJO) throws Exception {
+    public ResponseEntity<Map<String, Object>> createWellBeingData(@RequestBody WellBeingPOJO wellBeingPOJO) throws Exception {
 
         Map<String, Object> requestBody = new HashMap<>();
         Map<String, Object> response = new HashMap<>();
@@ -36,23 +36,23 @@ public class WellBeingDataController extends BaseController {
             return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.UNAUTHORIZED);
         }
 
-        String ehrId = TxnIdGeneretaror.generate();
+        String wellBeingId = TxnIdGeneretaror.generate();
         String issued = String.valueOf(new Date().getTime());
-        String ehrDataString = FabricUtils.getWellBeingStringData(wellBeingPOJO);
+        String WellBeingDataString = FabricUtils.getWellBeingStringData(wellBeingPOJO);
 
-        byte[] strToBytes = ehrDataString.getBytes();
+        byte[] strToBytes = WellBeingDataString.getBytes();
         String qmHash = IpfsClientUtils.getContentCid(strToBytes);
 
         requestBody.put("username", wellBeingPOJO.getUname());
-        requestBody.put("pointer", ehrId);
-        requestBody.put("key", ehrId);
+        requestBody.put("pointer", wellBeingId);
+        requestBody.put("key", wellBeingId);
         requestBody.put("type", FabricUtils.dataType.wellBeing);
         requestBody.put("data", qmHash);
         requestBody.put("issued", issued);
         requestBody.put("maturity", "N/A");
 
         response = FabricUtils.getFabricResults(
-                FabricUtils.ContractName.CreateEhr.toString(),
+                FabricUtils.ContractName.CreateWellBeingData.toString(),
                 wellBeingPOJO.getUname(),
                 wellBeingPOJO.getOrgMsp(),
                 requestBody
@@ -61,8 +61,8 @@ public class WellBeingDataController extends BaseController {
         return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.CREATED);
     }
 
-    @GetMapping(value = "/getAllEhrByUser", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> getAllEhrByUser(@RequestParam String username, @RequestParam String orgMsp) throws Exception {
+    @GetMapping(value = "/getAllWellBeingByUser", produces = "application/json")
+    public ResponseEntity<Map<String, Object>> getAllWellBeingByUser(@RequestParam String username, @RequestParam String orgMsp) throws Exception {
 
         Map<String, Object> requestBody = new HashMap<>();
         Map<String, Object> response = new HashMap<>();
@@ -77,7 +77,7 @@ public class WellBeingDataController extends BaseController {
         requestBody.put("username", username);
 
         response = FabricUtils.getFabricResults(
-                FabricUtils.ContractName.GetAllEhrByUser.toString(),
+                FabricUtils.ContractName.GetAllWellBeingDataByUser.toString(),
                 username,
                 orgMsp,
                 requestBody
@@ -86,7 +86,7 @@ public class WellBeingDataController extends BaseController {
     }
 
     @GetMapping(value = "/{id}", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> getEhr(@PathVariable String id, @RequestParam String username, @RequestParam String orgMsp) throws Exception {
+    public ResponseEntity<Map<String, Object>> getWellBeing(@PathVariable String id, @RequestParam String username, @RequestParam String orgMsp) throws Exception {
 
         Map<String, Object> requestBody = new HashMap<>();
         Map<String, Object> response = new HashMap<>();
@@ -101,7 +101,7 @@ public class WellBeingDataController extends BaseController {
         requestBody.put("id", id);
 
         response = FabricUtils.getFabricResults(
-                FabricUtils.ContractName.ReadEhr.toString(),
+                FabricUtils.ContractName.ReadWellBeingData.toString(),
                 username,
                 orgMsp,
                 requestBody
@@ -111,7 +111,7 @@ public class WellBeingDataController extends BaseController {
     }
 
     @PostMapping(value = "/ticket/{ticketId}", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<Map<String, Object>> getEhrDataWithTicket(@PathVariable String ticketId, @RequestParam String username, @RequestParam String mspOrg) throws Exception {
+    public ResponseEntity<Map<String, Object>> getWellBeingDataWithTicket(@PathVariable String ticketId, @RequestParam String username, @RequestParam String mspOrg) throws Exception {
 
         Map<String, Object> requestBody = new HashMap<>();
         Map<String, Object> response = new HashMap<>();
@@ -126,7 +126,7 @@ public class WellBeingDataController extends BaseController {
         requestBody.put("id", ticketId);
 
         response = FabricUtils.getFabricResults(
-                FabricUtils.ContractName.ReadEhr.toString(),
+                FabricUtils.ContractName.ReadWellBeingData.toString(),
                 username,
                 mspOrg,
                 requestBody
@@ -136,7 +136,7 @@ public class WellBeingDataController extends BaseController {
 
         if (Long.parseLong(String.valueOf(resultObj.get("Maturity")).replace("\"", "")) < new Date().getTime()) {
                 FabricUtils.getFabricResults(
-                    FabricUtils.ContractName.DeleteTempEhr.toString(),
+                    FabricUtils.ContractName.DeleteTempWellBeingData.toString(),
                     username,
                     mspOrg,
                     requestBody

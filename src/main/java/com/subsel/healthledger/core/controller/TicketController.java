@@ -36,21 +36,21 @@ public class TicketController extends BaseController {
             return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.UNAUTHORIZED);
         }
 
-        String pointer = TxnIdGeneretaror.generate();
+        String ticketId = TxnIdGeneretaror.generate();
         long issued = new Date().getTime();
         String maturity = String.valueOf(60 * 1000 * Long.parseLong(ticketPOJO.getLimit()) + issued);
-        String ehrId = ticketPOJO.getKey();
+        String wellBeingId = ticketPOJO.getKey();
         requestBody.put("id", ticketPOJO.getKey());
 
         Map<String, Object> pointerData = FabricUtils.getFabricResults(
-                FabricUtils.ContractName.ReadEhr.toString(),
+                FabricUtils.ContractName.ReadWellBeingData.toString(),
                 ticketPOJO.getUname(),
                 ticketPOJO.getOrgMsp(),
                 requestBody
         );
         requestBody.clear();
-        requestBody.put("pointer", pointer);
-        requestBody.put("key", ehrId);
+        requestBody.put("pointer", ticketId);
+        requestBody.put("key", wellBeingId);
         requestBody.put("username", ticketPOJO.getUname());
         requestBody.put("type", FabricUtils.dataType.permission);
 
@@ -63,7 +63,7 @@ public class TicketController extends BaseController {
         requestBody.put("maturity", maturity);
 
         response = FabricUtils.getFabricResults(
-                FabricUtils.ContractName.CreateEhr.toString(),
+                FabricUtils.ContractName.CreateWellBeingData.toString(),
                 ticketPOJO.getUname(),
                 ticketPOJO.getOrgMsp(),
                 requestBody
@@ -88,7 +88,7 @@ public class TicketController extends BaseController {
         requestBody.put("data", String.valueOf(FabricUtils.permissionStatus.no));
 
         response = FabricUtils.getFabricResults(
-                FabricUtils.ContractName.DeleteTempEhr.toString(),
+                FabricUtils.ContractName.DeleteTempWellBeingData.toString(),
                 ticketPOJO.getUname(),
                 ticketPOJO.getOrgMsp(),
                 requestBody
@@ -112,7 +112,7 @@ public class TicketController extends BaseController {
         requestBody.put("id", ticketId);
 
         response = FabricUtils.getFabricResults(
-                FabricUtils.ContractName.ReadEhr.toString(),
+                FabricUtils.ContractName.ReadWellBeingData.toString(),
                 ticketPOJO.getUname(),
                 ticketPOJO.getOrgMsp(),
                 requestBody
@@ -123,7 +123,7 @@ public class TicketController extends BaseController {
 
         if (oldMaturity < new Date().getTime()) {
             FabricUtils.getFabricResults(
-                    FabricUtils.ContractName.DeleteTempEhr.toString(),
+                    FabricUtils.ContractName.DeleteTempWellBeingData.toString(),
                     ticketPOJO.getUname(),
                     ticketPOJO.getOrgMsp(),
                     requestBody
