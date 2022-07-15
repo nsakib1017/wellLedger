@@ -16,7 +16,8 @@ export class HealthLedgerContract extends Contract {
                 Username: 'genesis',
                 Identity: 'blue',
                 Password: 'saltedP',
-                MspId: 'Org1Msp'
+                MspId: 'Org1Msp',
+                LoggedIn: false
             }
         ];
         const data: Data[] = [
@@ -54,7 +55,8 @@ export class HealthLedgerContract extends Contract {
             Identity: identity,
             Username: username,
             Password: password,
-            MspId: mspId
+            MspId: mspId,
+            LoggedIn: false
         }
         await ctx.stub.putState(username, Buffer.from(JSON.stringify(user)));
     }
@@ -64,10 +66,23 @@ export class HealthLedgerContract extends Contract {
         const userString = await this.ReadUser(ctx, username);
         const user = JSON.parse(userString);
         if(user.length !== 0 && user.Password === password){
-            return userString;
+            const datumString = await this.ReadUser(ctx, username);
+            const datum = JSON.parse(datumString);
+            datum.LoggedIn = true;
+            await ctx.stub.putState(username, Buffer.from(JSON.stringify(datum)));
+            return JSON.stringify(datum);
         } else {
             return new Error(`The user ${username} does not exist`)
         }
+    }
+
+    @Transaction(false)
+    public async LogOut(ctx: Context, username: string){
+        const userString = await this.ReadUser(ctx, username);
+        const user = JSON.parse(userString);
+        user.LoggedIn = false;
+        await ctx.stub.putState(username, Buffer.from(JSON.stringify(user)));
+        return JSON.stringify(user);
     }
 
     // CreateAsset issues a new asset to the world state with given details.

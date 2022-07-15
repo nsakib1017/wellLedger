@@ -20,4 +20,7 @@ export class User {
 
     @Property()
     public MspId: string;
+
+    @Property()
+    public LoggedIn: boolean;
 }
