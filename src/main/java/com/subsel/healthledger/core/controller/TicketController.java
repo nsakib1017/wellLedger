@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import com.subsel.healthledger.common.controller.BaseController;
 import com.subsel.healthledger.core.model.TicketPOJO;
-import com.subsel.healthledger.util.FabricUtils;
-import com.subsel.healthledger.util.IpfsClientUtils;
-import com.subsel.healthledger.util.TxnIdGeneretaror;
+import com.subsel.healthledger.utils.FabricUtils;
+import com.subsel.healthledger.utils.IpfsClientUtils;
+import com.subsel.healthledger.utils.TxnIdGeneretaror;
 
-import com.subsel.healthledger.util.UserUtils;
+import com.subsel.healthledger.utils.UserUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +52,7 @@ public class TicketController extends BaseController {
         requestBody.put("pointer", ticketId);
         requestBody.put("key", wellBeingId);
         requestBody.put("username", ticketPOJO.getUname());
-        requestBody.put("type", FabricUtils.dataType.permission);
+        requestBody.put("type", FabricUtils.dataType.ticket);
 
         JsonNode pointerDataObj = (JsonNode) pointerData.get("results");
         String pointerQmHash = String.valueOf(pointerDataObj.get("Data")).replace("\"", "");

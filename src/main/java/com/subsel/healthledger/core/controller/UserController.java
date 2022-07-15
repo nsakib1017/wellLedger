@@ -2,9 +2,9 @@ package com.subsel.healthledger.core.controller;
 
 import com.subsel.healthledger.common.controller.BaseController;
 import com.subsel.healthledger.core.model.UserPOJO;
-import com.subsel.healthledger.util.FabricNetworkConstants;
-import com.subsel.healthledger.util.FabricUtils;
-import com.subsel.healthledger.util.UserUtils;
+import com.subsel.healthledger.utils.FabricNetworkConstants;
+import com.subsel.healthledger.utils.FabricUtils;
+import com.subsel.healthledger.utils.UserUtils;
 
 import org.hyperledger.fabric.gateway.*;
 import org.hyperledger.fabric.sdk.Enrollment;

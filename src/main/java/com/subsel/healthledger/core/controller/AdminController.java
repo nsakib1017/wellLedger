@@ -13,8 +13,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.subsel.healthledger.util.FabricNetworkConstants;
-import com.subsel.healthledger.util.FabricUtils;
+import com.subsel.healthledger.utils.FabricNetworkConstants;
+import com.subsel.healthledger.utils.FabricUtils;
 
 import java.nio.file.Paths;
 import java.util.*;
