@@ -4,11 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import com.subsel.healthledger.common.controller.BaseController;
 import com.subsel.healthledger.core.model.TicketPOJO;
-import com.subsel.healthledger.utils.FabricUtils;
-import com.subsel.healthledger.utils.IpfsClientUtils;
-import com.subsel.healthledger.utils.TxnIdGeneretaror;
+import com.subsel.healthledger.utils.*;
 
-import com.subsel.healthledger.utils.UserUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -58,7 +55,9 @@ public class TicketController extends BaseController {
         String pointerQmHash = String.valueOf(pointerDataObj.get("Data")).replace("\"", "");
         String pointerDataAsString = IpfsClientUtils.getContentFromCid(pointerQmHash);
 
-        requestBody.put("data", pointerDataAsString);
+        String plainText = AESUtils.decryptString(pointerDataAsString, UserUtils.getUserPassword(ticketPOJO.getUname(), ticketPOJO.getOrgMsp()));
+
+        requestBody.put("data", plainText);
         requestBody.put("issued", String.valueOf(issued));
         requestBody.put("maturity", maturity);
 

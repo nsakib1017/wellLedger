@@ -3,12 +3,8 @@ package com.subsel.healthledger.core.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.subsel.healthledger.common.controller.BaseController;
 import com.subsel.healthledger.core.model.WellBeingPOJO;
+import com.subsel.healthledger.utils.*;
 
-import com.subsel.healthledger.utils.FabricUtils;
-import com.subsel.healthledger.utils.IpfsClientUtils;
-import com.subsel.healthledger.utils.TxnIdGeneretaror;
-
-import com.subsel.healthledger.utils.UserUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,9 +34,11 @@ public class WellBeingDataController extends BaseController {
 
         String wellBeingId = TxnIdGeneretaror.generate();
         String issued = String.valueOf(new Date().getTime());
-        String WellBeingDataString = FabricUtils.getWellBeingStringData(wellBeingPOJO);
+        String wellBeingDataString = FabricUtils.getWellBeingStringData(wellBeingPOJO);
 
-        byte[] strToBytes = WellBeingDataString.getBytes();
+        String cipherText = AESUtils.encryptString(wellBeingDataString, UserUtils.getUserPassword(wellBeingPOJO.getUname(), wellBeingPOJO.getOrgMsp()));
+
+        byte[] strToBytes = cipherText.getBytes();
         String qmHash = IpfsClientUtils.getContentCid(strToBytes);
 
         requestBody.put("username", wellBeingPOJO.getUname());
