@@ -133,8 +133,18 @@ public class FabricUtils {
     }
 
     public static String getWellBeingStringData (WellBeingPOJO wellBeingPOJO) {
-        return String.format("username => %s | type => %s | steps => %s | calorie => %s | sleep => %s | date => %s | heartRate => %s | orgMSP => %s",
+        return String.format("username=>%s|type=>%s|steps=>%s|calorie=>%s|sleep=>%s|date=>%s|heartRate=>%s|orgMSP=>%s",
                 wellBeingPOJO.getUname(), wellBeingPOJO.getType(), wellBeingPOJO.getStepsCount(), wellBeingPOJO.getCalorieBurnt(), wellBeingPOJO.getSleepTime(), wellBeingPOJO.getDate(), wellBeingPOJO.getHeartRate(), wellBeingPOJO.getOrgMsp());
+    }
+
+    public static Map<String, String> getWellBeingMappedData (String wellBeingPlaintextData) {
+        String[] wellBeingData = wellBeingPlaintextData.split("\\|", 0);
+        Map<String, String> datumObject = new HashMap<>();
+        for (String wellBeingDatum: wellBeingData) {
+            String[] datumMap = wellBeingDatum.split("=>", 2);
+            datumObject.put(datumMap[0], datumMap[1]);
+        }
+        return datumObject;
     }
 
     private static String getPasswordDigest (String password) throws NoSuchAlgorithmException {

@@ -88,6 +88,7 @@ public class WellBeingDataController extends BaseController {
 
         Map<String, Object> requestBody = new HashMap<>();
         Map<String, Object> response = new HashMap<>();
+        Map<String, Object> finalResult = new HashMap<>();
         HttpHeaders headers = new HttpHeaders();
 
         boolean isLoggedIn = UserUtils.userLoggedIn(username, orgMsp);
@@ -105,7 +106,15 @@ public class WellBeingDataController extends BaseController {
                 requestBody
         );
 
-        return new ResponseEntity<Map<String, Object>>(response, headers, HttpStatus.OK);
+        JsonNode pointerDataObj = (JsonNode) response.get("results");
+        String pointerQmHash = String.valueOf(pointerDataObj.get("Data")).replace("\"", "");
+        String pointerDataAsString = IpfsClientUtils.getContentFromCid(pointerQmHash);
+        String plainText = AESUtils.decryptString(pointerDataAsString, UserUtils.getUserPassword(username, orgMsp));
+
+        finalResult.put("fabricResult", pointerDataObj);
+        finalResult.put("wellBeingData", FabricUtils.getWellBeingMappedData(plainText));
+
+        return new ResponseEntity<Map<String, Object>>(finalResult, headers, HttpStatus.OK);
     }
 
     @PostMapping(value = "/ticket/{ticketId}", produces = "application/json")
@@ -141,7 +150,14 @@ public class WellBeingDataController extends BaseController {
                 );
                 response.clear();
                 response.put("message", "Ticket expired");
+                return new ResponseEntity<>(response, headers, HttpStatus.OK);
         }
+
+        String pointerQmHashData = String.valueOf(resultObj.get("Data")).replace("\"", "");
+
+        response.clear();
+        response.put("fabricResult", resultObj);
+        response.put("wellBeingData", FabricUtils.getWellBeingMappedData(pointerQmHashData));
 
         return new ResponseEntity<>(response, headers, HttpStatus.OK);
     }
