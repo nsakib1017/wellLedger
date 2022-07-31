@@ -1,4 +1,4 @@
-(* set ignoreTypes = false. *)
+set ignoreTypes = false.
 
 free c: channel.
 
