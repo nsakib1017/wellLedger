@@ -50,12 +50,11 @@ query attacker(wellBeingData);
 
 (* U1 process *)
 
-let processU1(skU1: skey, pkS: pkey, skU2: pkey) = 
+let processU1(skU1: skey, pkS: pkey, pkU2: pkey) = 
 
     in(c, (xI: host, xU2: host));
 	if (xI = I) && (xU2 = U2) then
 	let pkU1 = pk(skU1) in
-    let pkU2 = pk(skU2) in
 
     (* M1 *)
     if xI = I then in
@@ -103,12 +102,11 @@ let processU1(skU1: skey, pkS: pkey, skU2: pkey) =
 
 (* U2 process *)
 
-let processU2(skU2: skey, pkS: pkey, skU1: pkey) = 
+let processU2(skU2: skey, pkS: pkey, pkU1: pkey) = 
 
     in(c, (xU1: host, xS: host));
 	if (xU1 = U1) && (xS = S) then
 	let pkU2 = pk(skU2) in
-    let pkU1 = pk(skU1) in
 
     (* M3 *)
     new N3: nonce;
@@ -156,13 +154,12 @@ let processU2(skU2: skey, pkS: pkey, skU1: pkey) =
 
 (* I process *)
 
-let processI(skS: pkey, skI: sskey) = 
+let processI(pkS: pkey, skI: sskey) = 
 
     (* M1 *)
     in(c, (xN1String: bitstring, xU1: host, =metaData, encWellbeing: bitstring, hashedWellBeingSigned: bitstring));
 	if xU1 = U1 then
     let pkI = pk(skI) in
-    let pkS = pk(skS) in
     
     (* M2 *)
     let qmHashData = qmhash(hashedWellBeingSigned) in
@@ -182,15 +179,12 @@ let processI(skS: pkey, skI: sskey) =
 
 (* S process *)
 
-let processS(skS: pkey, skU1: skey, skU2: skey, skI: sskey) = 
+let processS(skS: pkey, pkU1: skey, pkU2: skey, pkI: sskey) = 
 
     (* M2 *)
     in(c, (xN2String: bitstring, xU1: host ,=metaData, qmHashRec: bitstring));
 	if (xU1 = U1) then
     let pkS = pk(skS) in
-    let pkU1 = pk(skU1) in 
-    let pkU2 = pk(skU2) in 
-    let pkI = pk(skI) in
 
     (* M3 *)
     in (c, (encU1Identity: bitstring, signU1Identity: bitstring));
