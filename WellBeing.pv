@@ -89,7 +89,7 @@ let processU1(skU1: skey, pkS: pkey, skU2: pkey) =
             (   nonce_to_bitstring(N7),
                 encrypt((tokenU1U2, encrypt(tempWellBeing, pkU2), sign(hash(tempWellBeing), skU1), host_to_bitstring(U2), tc), pkS),
                 sign(hash(tokenU1U2, encrypt(tempWellBeing, pkU2), sign(hash(tempWellBeing), skU1), host_to_bitstring(U2), tc), skU1)
-            ),
+            )
         );
     
     (* M11 *)
