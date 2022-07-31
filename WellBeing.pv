@@ -246,12 +246,15 @@ process
 	(
           (* Launch an unbounded number of sessions of the initiator *)
           (!processU1(skU1, pkS, pkU2)) | 
+          
           (* Launch an unbounded number of sessions of the responder *)
           (!processU2(skU2, pkS, pkU1)) |
+          
           (* Launch an unbounded number of sessions of the server *)
           (!processI(pkS, skI)) |
+          
           (* Key registration process *)
-	  (!processS(skS, pkU1, pkU2, pkI))
+	      (!processS(skS, pkU1, pkU2, pkI))
         )
 
 
