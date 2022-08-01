@@ -56,10 +56,13 @@ event beginDataSharingRequestPartial(host, host, nonce, bitstring).
 event endDataSharingRequestPartial(host, host, nonce, bitstring).
 event beginDataSharingRequestFull(host, host, nonce, bitstring).
 event endDataSharingRequestFull(host, host, nonce, bitstring).
+event beginIpfDataRetrieveFromDapp(host, host, nonce, bitstring).
+event endIpfDataRetrieveFromDapp(host, host, nonce, bitstring).
 
 query owner: host, ipfs: host, meta: bitstring; inj-event(endMetadataUpload(owner,ipfs, meta)) ==> inj-event(beginMetadataUpload(owner,ipfs, meta)).
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce; inj-event(endDataSharingRequestPartial(owner, requester, sharingNonce, meta)) ==> inj-event(beginDataSharingRequestPartial(owner,requester, sharingNonce, meta)).
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce, sharingToken: bitstring; inj-event(endDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)) ==> inj-event(beginDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)).
+query owner: host, requester: host, sharingNonce: nonce, encWellBeingData: bitstring; inj-event(endIpfDataRetrieveFromDapp(owner, requester, sharingNonce, encWellBeingData)) ==> inj-event(beginIpfDataRetrieveFromDapp(owner, requester, sharingNonce, encWellBeingData)).
 
 (* U1 process *)
 
@@ -83,6 +86,7 @@ let processU1(skU1: skey, pkS: pkey, pkU2: pkey) =
     
     (* M6 *)
     new N5: nonce;
+    event beginIpfDataRetrieveFromDapp(U1, xU2, N5, encrypt(wellBeingData, pkU1));
         out(c, (encrypt((nonce_to_bitstring(N5), metaData), pkS), sign(hash((nonce_to_bitstring(N5), metaData)), skU1)));
     
     (* M9 *)
@@ -232,6 +236,7 @@ let processS(skS: skey, pkU1: pkey, pkU2: pkey, pkI: pkey) =
     if nonce_to_bitstring(N6) = xN6Enc then
     
     (* M9 *) 
+    event endIpfDataRetrieveFromDapp(U1, U2, bitstring_to_nonce(xN5Enc), encWellBeing);
     out(c, (encrypt((xN5Enc, encWellBeing, encWellBeingHashed), pkU1), sign(hash((xN5Enc, encWellBeing, encWellBeingHashed)), skS)));
 
     (* M10 *) 
