@@ -6,54 +6,56 @@ type host.
 type nonce.
 type pkey.
 type skey.
-type spkey.
 
+
+(* Type converter function *)
 fun nonce_to_bitstring(nonce): bitstring [data,typeConverter].
 fun bitstring_to_nonce(bitstring): nonce [data,typeConverter].
 fun host_to_bitstring(host): bitstring [data,typeConverter].
 fun bitstring_to_host(bitstring): host [data,typeConverter].
 
-(* Public key encryption *)
 
+(* Public key encryption *)
 fun pk(skey): pkey.
 fun encrypt(bitstring, pkey): bitstring.
 reduc forall x: bitstring, y: skey; decrypt(encrypt(x,pk(y)),y) = x.
 
-(* Signatures *)
 
+(* Signatures *)
 fun sign(bitstring, skey): bitstring.
 reduc forall m: bitstring, k: skey; checksign(sign(m,k), pk(k)) = m.
 
-(* Hash function *)
 
+(* Hash function *)
 fun hash(bitstring): bitstring.
 
-(* QmHash function *)
 
+(* QmHash function *)
 fun qmhash(bitstring): bitstring.
 
-(* Secrecy assumptions *)
 
+(* Secrecy assumptions *)
 not attacker(new skU1).
 not attacker(new skU2).
 not attacker(new skS).
 not attacker(new skI).
 
-(* Honest host names U1, U2, S, I *)
 
+(* Honest host names U1, U2, S, I *)
 free U1, U2, S, I: host.
 
-(* Secret declaration *)
 
+(* Secret declaration *)
 free wellBeingData, tokenU1U2, metaData, tempWellBeing : bitstring [private].
 
+
+(* Secrecy query *)
 query attacker(wellBeingData);
       attacker(tempWellBeing);
       attacker(tokenU1U2).
 
 
 (* Event declarations *)
-
 event beginMetadataUpload(host, host, bitstring).
 event endMetadataUpload(host, host, bitstring).
 event beginDataSharingRequestPartial(host, host, nonce, bitstring).
@@ -67,6 +69,7 @@ event endSendTokentoDapp(host, host, nonce, bitstring).
 event beginDataReadByRequester(host, host, bitstring).
 event endDataReadByRequester(host, host, bitstring).
 
+(* Event queries *)
 query owner: host, ipfs: host, meta: bitstring; inj-event(endMetadataUpload(owner,ipfs, meta)) ==> inj-event(beginMetadataUpload(owner,ipfs, meta)).
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce; inj-event(endDataSharingRequestPartial(owner, requester, sharingNonce, meta)) ==> inj-event(beginDataSharingRequestPartial(owner,requester, sharingNonce, meta)).
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce, sharingToken: bitstring; inj-event(endDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)) ==> inj-event(beginDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)).
@@ -74,8 +77,9 @@ query owner: host, requester: host, sharingNonce: nonce, encWellBeingData: bitst
 query owner: host, requester: host, sharingToken: bitstring, sharingNonce: nonce; inj-event(endSendTokentoDapp(owner, requester, sharingNonce, sharingToken)) ==> inj-event(beginSendTokentoDapp(owner, requester, sharingNonce, sharingToken)).
 query owner: host, requester: host, tempWellBeingData: bitstring; inj-event(endDataReadByRequester(owner, requester, tempWellBeingData)) ==> inj-event(beginDataReadByRequester(owner, requester, tempWellBeingData)).
 
-(* U1 process *)
 
+
+(* U1 process *)
 let processU1(skU1: skey, pkS: pkey, pkU2: pkey) = 
 
     in(c, (xI: host, xU2: host));
@@ -132,8 +136,8 @@ let processU1(skU1: skey, pkS: pkey, pkU2: pkey) =
     0.
 
 
-(* U2 process *)
 
+(* U2 process *)
 let processU2(skU2: skey, pkS: pkey, pkU1: pkey) = 
 
     in(c, (xU1: host, xS: host));
@@ -189,8 +193,8 @@ let processU2(skU2: skey, pkS: pkey, pkU1: pkey) =
     0.
 
 
-(* I process *)
 
+(* I process *)
 let processI(pkS: pkey, skI: skey) = 
 
     (* M1 *)
@@ -217,7 +221,6 @@ let processI(pkS: pkey, skI: skey) =
 
 
 (* S process *)
-
 let processS(skS: skey, pkU1: pkey, pkU2: pkey, pkI: pkey) = 
 
     (* M2 *)
@@ -273,6 +276,7 @@ let processS(skS: skey, pkU1: pkey, pkU2: pkey, pkI: pkey) =
     0.
 
 
+(* Main process setup *)
 process 
     new skU1: skey; 
 	let pkU1 = pk(skU1) in
@@ -287,16 +291,16 @@ process
 	let pkI = pk(skI) in
 	    out(c, pkI);
 	(
-          (* Launch an unbounded number of sessions of the initiator *)
+          (* Launch an unbounded number of sessions of the data owner *)
           (!processU1(skU1, pkS, pkU2)) | 
           
-          (* Launch an unbounded number of sessions of the responder *)
+          (* Launch an unbounded number of sessions of the data requester *)
           (!processU2(skU2, pkS, pkU1)) |
           
-          (* Launch an unbounded number of sessions of the server *)
+          (* Launch an unbounded number of sessions of the IPFS node *)
           (!processI(pkS, skI)) |
           
-          (* Key registration process *)
+          (* Launch an unbounded number of sessions of the DApp node without IPFS *)
 	      (!processS(skS, pkU1, pkU2, pkI))
     )
 
