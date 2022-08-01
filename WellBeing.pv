@@ -82,21 +82,33 @@ query owner: host, requester: host, tempWellBeingData: bitstring; inj-event(endD
 (* U1 process *)
 let processU1(skU1: skey, pkS: pkey, pkU2: pkey, pkI: pkey) = 
 
-    in(c, (xI: host, xU2: host));
+    in (c, 
+            (
+                xI: host, 
+                xU2: host
+            )
+        );
 	if (xI = I) && (xU2 = U2) then
 	let pkU1 = pk(skU1) in
 
     (* M1 *)
     if xI = I then 
     new N1: nonce;
-        event beginMetadataUpload(U1, xI, N1, metaData);
-        out(c, (
-            encrypt((host_to_bitstring(U1), nonce_to_bitstring(N1), metaData, encrypt(wellBeingData, pkU1), sign(hash(wellBeingData), skU1)), pkI),
-            sign(hash((host_to_bitstring(U1), nonce_to_bitstring(N1), metaData, encrypt(wellBeingData, pkU1), sign(hash(wellBeingData), skU1))), skU1)
-            ));
+    event beginMetadataUpload(U1, xI, N1, metaData);
+    out (c,  
+            (
+                encrypt((host_to_bitstring(U1), nonce_to_bitstring(N1), metaData, encrypt(wellBeingData, pkU1), sign(hash(wellBeingData), skU1)), pkI),
+                sign(hash((host_to_bitstring(U1), nonce_to_bitstring(N1), metaData, encrypt(wellBeingData, pkU1), sign(hash(wellBeingData), skU1))), skU1)
+            )
+        );
     
     (* M5 *)
-    in(c, (encMetaData: bitstring, signedMetaData: bitstring));
+    in (c, 
+            (
+                encMetaData: bitstring, 
+                signedMetaData: bitstring
+            )
+        );
     let (u1IdMetadataSignedHash: bitstring) = checksign(signedMetaData, pkU2) in
     let(encN4:bitstring, encDecMetaData:bitstring) = decrypt(encMetaData, skU1) in
     if (u1IdMetadataSignedHash = hash((encN4, encDecMetaData))) then
@@ -104,10 +116,20 @@ let processU1(skU1: skey, pkS: pkey, pkU2: pkey, pkI: pkey) =
     (* M6 *)
     new N5: nonce;
     event beginIpfDataRetrieveFromDapp(U1, xU2, N5, encrypt(wellBeingData, pkU1));
-        out(c, (encrypt((nonce_to_bitstring(N5), metaData), pkS), sign(hash((nonce_to_bitstring(N5), metaData)), skU1)));
+    out (c, 
+            (
+                encrypt((nonce_to_bitstring(N5), metaData), pkS), 
+                sign(hash((nonce_to_bitstring(N5), metaData)), skU1)
+            )
+        );
     
     (* M9 *)
-    in(c, (recEncMetaData: bitstring, recSignHashedWellBeing: bitstring));
+    in (c, 
+            (
+                recEncMetaData: bitstring, 
+                recSignHashedWellBeing: bitstring
+            )
+        );
     let(signedHashedWellBeing: bitstring) = checksign(recSignHashedWellBeing, pkS) in
     let(xN5Enc: bitstring, xEncWellbeing: bitstring, xSignedHashedWellBeing: bitstring) = decrypt(recEncMetaData, skU1) in
     if (hash((xN5Enc, xEncWellbeing, xSignedHashedWellBeing))=signedHashedWellBeing) then
@@ -143,13 +165,18 @@ let processU1(skU1: skey, pkS: pkey, pkU2: pkey, pkI: pkey) =
 (* U2 process *)
 let processU2(skU2: skey, pkS: pkey, pkU1: pkey) = 
 
-    in(c, (xU1: host, xS: host));
+    in (c, 
+            (
+                xU1: host, 
+                xS: host
+            )
+        );
 	if (xU1 = U1) && (xS = S) then
 	let pkU2 = pk(skU2) in
 
     (* M3 *)
     new N3: nonce;
-    out(c, 
+    out (c, 
             (
                 encrypt((nonce_to_bitstring(N3), host_to_bitstring(U1)), pkS), 
                 sign(hash((nonce_to_bitstring(N3), host_to_bitstring(U1))), skU2)
@@ -157,11 +184,16 @@ let processU2(skU2: skey, pkS: pkey, pkU1: pkey) =
         );
 
     (* M4 *)
-    in (c, (encIdMeta: bitstring, signedIdMeta: bitstring));
-    let(hashU1Metadata: bitstring) = checksign(signedIdMeta, pkS) in
-    let(xEncN3:bitstring, u1SignString: bitstring, =metaData) = decrypt(encIdMeta, skU2) in
+    in (c, 
+            (
+                encIdMeta: bitstring, 
+                signedIdMeta: bitstring
+            )
+        );
+    let (hashU1Metadata: bitstring) = checksign(signedIdMeta, pkS) in
+    let (xEncN3:bitstring, u1SignString: bitstring, =metaData) = decrypt(encIdMeta, skU2) in
 
-    if(hash((xEncN3, u1SignString, metaData)) = hashU1Metadata) then
+    if (hash((xEncN3, u1SignString, metaData)) = hashU1Metadata) then
     if nonce_to_bitstring(N3) = xEncN3 then
     let (xHostU1) = bitstring_to_host(u1SignString) in
     if xHostU1=U1 then
@@ -169,12 +201,22 @@ let processU2(skU2: skey, pkS: pkey, pkU1: pkey) =
     (* M5 *)
     new N4: nonce;
     event beginDataSharingRequestPartial(xU1, U2, N4, metaData);
-    out(c, (encrypt((nonce_to_bitstring(N4), metaData), pkU1), sign(hash((nonce_to_bitstring(N4), metaData)), skU2)));
+    out(c, 
+            (
+                encrypt((nonce_to_bitstring(N4), metaData), pkU1), 
+                sign(hash((nonce_to_bitstring(N4), metaData)), skU2)
+            )
+        );
 
     (* M11 *)
-    in (c, (xU1EncRes: bitstring, xU1SignRes: bitstring));
-    let(hashOfM11: bitstring) = checksign(xU1SignRes, pkU1) in
-    let(xN4enc: bitstring, =tokenU1U2) = decrypt(xU1EncRes, skU2) in
+    in (c, 
+            (
+                xU1EncRes: bitstring, 
+                xU1SignRes: bitstring
+            )
+        );
+    let (hashOfM11: bitstring) = checksign(xU1SignRes, pkU1) in
+    let (xN4enc: bitstring, =tokenU1U2) = decrypt(xU1EncRes, skU2) in
     if hashOfM11=hash((xN4enc, tokenU1U2)) then 
     if xN4enc = nonce_to_bitstring(N4) then
     event endDataSharingRequestFull(xU1, U2, bitstring_to_nonce(xN4enc), tokenU1U2);
@@ -182,10 +224,20 @@ let processU2(skU2: skey, pkS: pkey, pkU1: pkey) =
     (* M12 *)
     new N8: nonce;
     event beginSendTokentoDapp(xU1, U2, N8, tokenU1U2);
-    out(c, (encrypt((nonce_to_bitstring(N8), tokenU1U2, host_to_bitstring(U2)), pkS), (sign(hash((nonce_to_bitstring(N8), tokenU1U2, host_to_bitstring(U2))), skU2))));
+    out (c, 
+            (
+                encrypt((nonce_to_bitstring(N8), tokenU1U2, host_to_bitstring(U2)), pkS), 
+                sign(hash((nonce_to_bitstring(N8), tokenU1U2, host_to_bitstring(U2))), skU2)
+            )
+        );
 
     (* M13 *)
-    in(c, (serverResEnc: bitstring, serverResSign: bitstring));
+    in (c, 
+            (
+                serverResEnc: bitstring, 
+                serverResSign: bitstring
+            )
+        );
     let (tempDataHashFromSign: bitstring ) = checksign(serverResSign, pkS) in
     let (xN8Mes: bitstring, tempDataEncFromMes: bitstring, tempDataHashFromMes: bitstring ) = decrypt(serverResEnc, skU2) in
 
@@ -202,7 +254,12 @@ let processU2(skU2: skey, pkS: pkey, pkU1: pkey) =
 let processI(pkS: pkey, skI: skey, pkU1: pkey) = 
 
     (* M1 *)
-    in(c, (metaDataFromU1Enc: bitstring, metaDataFromU1Sign: bitstring));
+    in (c, 
+            (
+                metaDataFromU1Enc: bitstring, 
+                metaDataFromU1Sign: bitstring
+            )
+        );
     let (xU1AsString: bitstring, xN1String: bitstring, =metaData, encWellbeing: bitstring, hashedWellBeingSigned: bitstring) = decrypt(metaDataFromU1Enc, skI) in
     let (metaDecFromU1Sign: bitstring) = checksign(metaDataFromU1Sign, pkU1) in
     if (metaDecFromU1Sign = hash((xU1AsString, xN1String, metaData, encWellbeing, hashedWellBeingSigned))) then
@@ -212,17 +269,31 @@ let processI(pkS: pkey, skI: skey, pkU1: pkey) =
     (* M2 *)
     let qmHashData = qmhash((encWellbeing, hashedWellBeingSigned)) in
     new N2: nonce;
-    out (c, (nonce_to_bitstring(N2), bitstring_to_host(xU1AsString), metaData, qmHashData));
+    out (c, 
+            (
+                nonce_to_bitstring(N2), bitstring_to_host(xU1AsString), metaData, qmHashData
+            )
+        );
     event endMetadataUpload(bitstring_to_host(xU1AsString), I, bitstring_to_nonce(xN1String), metaData);
 
     (* M7 *)
-    in(c, (recQmHashDataEnc: bitstring, recQmHashDataSign: bitstring));
+    in (c, 
+            (
+                recQmHashDataEnc: bitstring, 
+                recQmHashDataSign: bitstring
+            )
+        );
     let (qmHashDataSign: bitstring) = checksign(recQmHashDataSign, pkS) in
     let (xN6enc: bitstring, qmHashDataEnc: bitstring) = decrypt(recQmHashDataEnc, skI) in
     if (qmHashDataSign = hash((xN6enc, qmHashDataEnc))) then
 
     (* M8 *)
-    out(c, (encrypt((xN6enc, encWellbeing, hashedWellBeingSigned), pkS), sign((hash((xN6enc, encWellbeing, hashedWellBeingSigned))), skI)));
+    out (c, 
+            (
+                encrypt((xN6enc, encWellbeing, hashedWellBeingSigned), pkS), 
+                sign((hash((xN6enc, encWellbeing, hashedWellBeingSigned))), skI)
+            )
+        );
     0.
 
 
@@ -231,31 +302,63 @@ let processI(pkS: pkey, skI: skey, pkU1: pkey) =
 let processS(skS: skey, pkU1: pkey, pkU2: pkey, pkI: pkey) = 
 
     (* M2 *)
-    in(c, (xN2String: bitstring, xU1: host, =metaData, qmHashRec: bitstring));
+    in (c, 
+            (
+                xN2String: bitstring, 
+                xU1: host, 
+                =metaData, 
+                qmHashRec: bitstring
+            )
+        );
 	if (xU1 = U1) then
     let pkS = pk(skS) in
 
     (* M3 *)
-    in (c, (encU1Identity: bitstring, signU1Identity: bitstring));
+    in (c, 
+            (
+                encU1Identity: bitstring, 
+                signU1Identity: bitstring
+            )
+        );
     let (signedHashU1Id: bitstring) = checksign(signU1Identity, pkU2) in
     let (xN3Enc:bitstring, encU1Host:bitstring) = decrypt(encU1Identity, skS) in
     if (hash((xN3Enc, encU1Host)) = signedHashU1Id) then
 
     (* M4 *)
-    out(c, (encrypt((xN3Enc, encU1Host, metaData),pkU2), sign(hash((xN3Enc, encU1Host, metaData)), skS)));
+    out (c, 
+            (
+                encrypt((xN3Enc, encU1Host, metaData),pkU2), 
+                sign(hash((xN3Enc, encU1Host, metaData)), skS)
+            )
+        );
 
     (* M6 *) 
-    in (c, (encU1Meta: bitstring, signU1Meta: bitstring));
-    let(signedHashU1Metadata: bitstring) = checksign(signU1Meta, pkU1) in
-    let(xN5Enc: bitstring, =metaData) = decrypt(signU1Meta, skS) in
+    in (c, 
+            (
+                encU1Meta: bitstring, 
+                signU1Meta: bitstring
+            )
+        );
+    let (signedHashU1Metadata: bitstring) = checksign(signU1Meta, pkU1) in
+    let (xN5Enc: bitstring, =metaData) = decrypt(signU1Meta, skS) in
     if (signedHashU1Metadata = hash((xN5Enc, metaData))) then
     
     (* M7 *) 
     new N6: nonce;
-    out (c, (encrypt((nonce_to_bitstring(N6), qmHashRec), pkI), sign(hash((nonce_to_bitstring(N6), qmHashRec)), skS)));
+    out (c, 
+            (
+                encrypt((nonce_to_bitstring(N6), qmHashRec), pkI), 
+                sign(hash((nonce_to_bitstring(N6), qmHashRec)), skS)
+            )
+        );
 
     (* M8 *) 
-    in(c, (encHashedWellBeingData: bitstring, signHashedWellBeingData: bitstring));
+    in (c, 
+            (
+                encHashedWellBeingData: bitstring, 
+                signHashedWellBeingData: bitstring
+            )
+        );
     let(signWellBeingHashed: bitstring) = checksign(signHashedWellBeingData, pkI) in
     let(xN6Enc: bitstring, encWellBeing: bitstring, encWellBeingHashed: bitstring) = decrypt(signHashedWellBeingData, skS) in
     if (hash((xN6Enc, encWellBeing, encWellBeingHashed))=signWellBeingHashed) then
@@ -263,22 +366,43 @@ let processS(skS: skey, pkU1: pkey, pkU2: pkey, pkI: pkey) =
     
     (* M9 *) 
     event endIpfDataRetrieveFromDapp(U1, U2, bitstring_to_nonce(xN5Enc), encWellBeing);
-    out(c, (encrypt((xN5Enc, encWellBeing, encWellBeingHashed), pkU1), sign(hash((xN5Enc, encWellBeing, encWellBeingHashed)), skS)));
+    out (c, 
+            (
+                encrypt((xN5Enc, encWellBeing, encWellBeingHashed), pkU1), 
+                sign(hash((xN5Enc, encWellBeing, encWellBeingHashed)), skS)
+            )
+        );
 
     (* M10 *) 
-    in(c, (xN7String: bitstring, tokenU1U2Enc: bitstring, tokenU1U2Sign: bitstring));
+    in (c, 
+            (
+                xN7String: bitstring, 
+                tokenU1U2Enc: bitstring, 
+                tokenU1U2Sign: bitstring
+            )
+        );
     let(hashTokenEncData: bitstring) = checksign(tokenU1U2Sign, pkU1) in
     let(=tokenU1U2, encTempMetadataSign: bitstring, encHashTempDataSign: bitstring, u2AsStringSign: bitstring, tcSign: bitstring) = decrypt(tokenU1U2Sign, skS) in
     if(hash((tokenU1U2, encTempMetadataSign, encHashTempDataSign, u2AsStringSign, tcSign)) = hashTokenEncData) then
     
     (* M12 *) 
-    in(c, (tokenSentByU2Enc: bitstring, tokenSentByU2Sign: bitstring));
+    in (c, 
+            (
+                tokenSentByU2Enc: bitstring,
+                tokenSentByU2Sign: bitstring
+            )
+        );
     let(signedHashTokenU2: bitstring) = checksign(tokenSentByU2Sign, pkU2) in
     let(xN8Mes: bitstring, =tokenU1U2, hostU2AsString: bitstring) = decrypt(tokenSentByU2Enc, skS) in
     if(hash((xN8Mes, tokenU1U2))=signedHashTokenU2) && (u2AsStringSign = hostU2AsString) then
 
    (* M13 *) 
-    out(c, (encrypt((xN8Mes, encTempMetadataSign, encHashTempDataSign), pkU2), sign(hash((xN8Mes, encTempMetadataSign, encHashTempDataSign)), skS)));
+    out (c, 
+            (
+                encrypt((xN8Mes, encTempMetadataSign, encHashTempDataSign), pkU2), 
+                sign(hash((xN8Mes, encTempMetadataSign, encHashTempDataSign)), skS)
+            )
+        );
     event endSendTokentoDapp(U1, U2, bitstring_to_nonce(xN8Mes), tokenU1U2);
     0.
 
