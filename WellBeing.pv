@@ -39,13 +39,21 @@ not attacker(new skU2).
 not attacker(new skS).
 not attacker(new skI).
 
-(* honest host names U1, U2, S, I *)
+(* Honest host names U1, U2, S, I *)
 
-free U1, U2, S, I: host.
+free U1, U2, S, I: host [private].
 free wellBeingData, tokenU1U2, metaData, tempWellBeing : bitstring [private].
 query attacker(wellBeingData);
       attacker(tempWellBeing);
       attacker(tokenU1U2).
+
+
+(* Event declarations *)
+
+event beginMetadataUpload(host, host, bitstring).
+event endMetadataUpload(host, host, bitstring).
+
+query owner: host, ipfs: host, meta:bitstring; inj-event(endMetadataUpload(owner,ipfs, meta)) ==> inj-event(beginMetadataUpload(owner,ipfs, meta)).
 
 (* U1 process *)
 
@@ -57,6 +65,7 @@ let processU1(skU1: skey, pkS: pkey, pkU2: pkey) =
 
     (* M1 *)
     if xI = I then 
+    event beginMetadataUpload(U1, xI, metaData);
     new N1: nonce;
         out(c, (U1, nonce_to_bitstring(N1), metaData, encrypt(wellBeingData, pkU1), sign(hash(wellBeingData), skU1)));
     
@@ -164,6 +173,7 @@ let processI(pkS: pkey, skI: skey) =
     let qmHashData = qmhash((encWellbeing, hashedWellBeingSigned)) in
     new N2: nonce;
     out (c, (nonce_to_bitstring(N2), xU1, metaData, qmHashData));
+    event endMetadataUpload(xU1, I, metaData);
 
     (* M7 *)
     in(c, (recQmHashDataEnc: bitstring, recQmHashDataSign: bitstring));
