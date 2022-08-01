@@ -1,3 +1,25 @@
+(* 
+
+WellBeing Data sharing protocol
+
+M1  | U1 -> I  : (A, B)
+M2  | I  -> S  : { pkB, B }skS
+M3  | U2 -> S  : { Na, A }pkB
+M4  | S  -> U2 : (B, A)
+M5  | U2 -> U1 : { pkA, A }skS
+M6  | U1 -> S  : { Na, Nb }pkA
+M7  | S  -> I  : { Nb }pkB
+M8  | I  -> S  : (A, B)
+M9  | S  -> U1 : { pkB, B }skS
+M10 | U1 -> S  : { Na, A }pkB
+M11 | U1 -> U2 : (B, A)
+M12 | U2 -> S  : { pkA, A }skS
+M13 | S  -> U2 : { Na, Nb }pkA
+
+*)
+
+
+
 set ignoreTypes = false.
 
 free c: channel.
