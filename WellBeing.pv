@@ -110,8 +110,7 @@ query dapp: host, ipfs: host, ipfsNonce: nonce, encWellB: bitstring, encWellBHas
 
 query owner: host, requester: host, sharingNonce: nonce, sharingToken: bitstring, 
       dapp: host, ipfs: host, ipfsNonce: nonce, encWellB: bitstring, tempWellBeing: bitstring, 
-      encWellBHashed: bitstring; event(endDataReadByRequester(owner, requester, tempWellBeing)) ==> inj-event(endDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)) && 
-                                                                                                    inj-event(endDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)).
+      encWellBHashed: bitstring; event(endDataReadByRequester(owner, requester, tempWellBeing)) ==> (inj-event(endDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)) ==> inj-event(endDataSharingRequestFull(owner, requester, sharingNonce, sharingToken))). 
 
 
 
