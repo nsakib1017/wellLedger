@@ -1,21 +1,23 @@
 (* 
 
-WellBeing Data sharing protocol
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-M1  | U1 -> I  : (A, B)
-M2  | I  -> S  : { pkB, B }skS
-M3  | U2 -> S  : { Na, A }pkB
-M4  | S  -> U2 : (B, A)
-M5  | U2 -> U1 : { pkA, A }skS
-M6  | U1 -> S  : { Na, Nb }pkA
-M7  | S  -> I  : { Nb }pkB
-M8  | I  -> S  : (A, B)
-M9  | S  -> U1 : { pkB, B }skS
-M10 | U1 -> S  : { Na, A }pkB
-M11 | U1 -> U2 : (B, A)
-M12 | U2 -> S  : { pkA, A }skS
-M13 | S  -> U2 : { Na, Nb }pkA
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+                **** WellBeing Data sharing protocol ****
+ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+| M1  | U1 ->  I  | { N_1, Id_M, Id'_M }_pkI, { H(N_1, Id_M, Id'_M) }_skU1                |
+| M2  | I  ->  S  | { N_2, U1, Id_M, QmH(Id'_M) }                                         |
+| M3  | U2 ->  S  | { N_3, U1 }_pkS, { H(N_3, U1) }_skU2                                  |
+| M4  | S  ->  U2 | { N_3, U1, Id_M }_pkU2, { H(N_3, U1, Id_M) }_skS                      |
+| M5  | U2 ->  U1 | { N_4, Id_M }_pkU1, { H(N_4, Id_M) }_skU2,                            |
+| M6  | U1 ->  S  | { N_5, Id_M }_pkS, { H(N_5, Id_M) }_skU1,                             |
+| M7  | S  ->  I  | { N_6, QmH(Id'_M) }_pkI, { H(N_6, QmH(Id'_M)) }_skS                   |
+| M8  | I  ->  S  | { N_6, Id'_M }_pkS, { H(N_6, Id'_M) }_skI                             |
+| M9  | S  ->  U1 | { N_5, Id'_M }_pkU1, { H(N_5, Id'_M) }_skS                            |
+| M10 | U1 ->  S  | { N_7, {TknU1U2, A, U2, TC}_pkS, { H(TknU1U2, A, U2, TC) }_skU1 }     |
+| M11 | U1 ->  U2 | { N_4, TknU1U2}_pkU2, { H(N_4, TknU1U2) }_skU1                        |
+| M12 | U2 ->  S  | { N_8, TknU1U2}_pkS, { H(N_8, TknU1U2) }_skU2                         |
+| M13 | S  ->  U2 | { N_8, A}_pkU2, { H(N_8, A) }_skS                                     |
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+Id'_M = { {M}_pkU1, H(M)skU1 }, A = { {M'}_pkU2, H(M')skU1 }
 
 *)
 
