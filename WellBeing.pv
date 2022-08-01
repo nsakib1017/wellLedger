@@ -41,7 +41,7 @@ not attacker(new skI).
 
 (* Honest host names U1, U2, S, I *)
 
-free U1, U2, S, I: host [private].
+free U1, U2, S, I: host.
 
 (* Secret declaration *)
 
@@ -64,12 +64,15 @@ event beginIpfDataRetrieveFromDapp(host, host, nonce, bitstring).
 event endIpfDataRetrieveFromDapp(host, host, nonce, bitstring).
 event beginSendTokentoDapp(host, host, nonce, bitstring).
 event endSendTokentoDapp(host, host, nonce, bitstring).
+event beginDataReadByRequester(host, host, bitstring).
+event endDataReadByRequester(host, host, bitstring).
 
 query owner: host, ipfs: host, meta: bitstring; inj-event(endMetadataUpload(owner,ipfs, meta)) ==> inj-event(beginMetadataUpload(owner,ipfs, meta)).
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce; inj-event(endDataSharingRequestPartial(owner, requester, sharingNonce, meta)) ==> inj-event(beginDataSharingRequestPartial(owner,requester, sharingNonce, meta)).
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce, sharingToken: bitstring; inj-event(endDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)) ==> inj-event(beginDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)).
 query owner: host, requester: host, sharingNonce: nonce, encWellBeingData: bitstring; inj-event(endIpfDataRetrieveFromDapp(owner, requester, sharingNonce, encWellBeingData)) ==> inj-event(beginIpfDataRetrieveFromDapp(owner, requester, sharingNonce, encWellBeingData)).
 query owner: host, requester: host, sharingToken: bitstring, sharingNonce: nonce; inj-event(endSendTokentoDapp(owner, requester, sharingNonce, sharingToken)) ==> inj-event(beginSendTokentoDapp(owner, requester, sharingNonce, sharingToken)).
+query owner: host, requester: host, tempWellBeingData: bitstring; inj-event(endDataReadByRequester(owner, requester, tempWellBeingData)) ==> inj-event(beginDataReadByRequester(owner, requester, tempWellBeingData)).
 
 (* U1 process *)
 
@@ -109,6 +112,7 @@ let processU1(skU1: skey, pkS: pkey, pkU2: pkey) =
     (* M10 *)
     new tc: bitstring;
     new N7: nonce;
+    event beginDataReadByRequester(U1, U2, tempWellBeing);
     out (c, 
             (   nonce_to_bitstring(N7),
                 encrypt((tokenU1U2, encrypt(tempWellBeing, pkU2), sign(hash(tempWellBeing), skU1), host_to_bitstring(U2), tc), pkS),
@@ -124,7 +128,8 @@ let processU1(skU1: skey, pkS: pkey, pkU2: pkey) =
                 encrypt((encN4, tokenU1U2), pkU2), 
                 sign(hash((encN4, tokenU1U2)), skU1)
             )
-        ).
+        );
+    0.
 
 
 (* U2 process *)
@@ -179,7 +184,9 @@ let processU2(skU2: skey, pkS: pkey, pkU1: pkey) =
     if (tempDataHashFromSign = hash((xN8Mes, tempDataEncFromMes, tempDataHashFromMes))) then
     if (xN8Mes = nonce_to_bitstring(N8)) then
     let (=tempWellBeing) = decrypt(tempDataEncFromMes, skU2) in
-    if hash(tempWellBeing) = tempDataHashFromMes then 0.
+    if hash(tempWellBeing) = tempDataHashFromMes then
+    event endDataReadByRequester(U1, U2, tempWellBeing);
+    0.
 
 
 (* I process *)
@@ -204,7 +211,8 @@ let processI(pkS: pkey, skI: skey) =
     if (qmHashDataSign = hash((xN6enc, qmHashDataEnc))) then
 
     (* M8 *)
-    out(c, (encrypt((xN6enc, encWellbeing, hashedWellBeingSigned), pkS), sign((hash((xN6enc, encWellbeing, hashedWellBeingSigned))), skI))).
+    out(c, (encrypt((xN6enc, encWellbeing, hashedWellBeingSigned), pkS), sign((hash((xN6enc, encWellbeing, hashedWellBeingSigned))), skI)));
+    0.
 
 
 
