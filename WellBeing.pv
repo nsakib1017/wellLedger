@@ -474,29 +474,3 @@ process
           (* Launch an unbounded number of sessions of the DApp node without IPFS *)
 	      (!processS(skS, pkU1, pkU2, pkI))
     )
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-    
-    
-
-
-
-        
-    
-
-    
