@@ -290,7 +290,7 @@ process
           
           (* Key registration process *)
 	      (!processS(skS, pkU1, pkU2, pkI))
-        )
+    )
 
 
 
