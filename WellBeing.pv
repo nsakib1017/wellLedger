@@ -108,6 +108,11 @@ query owner: host, requester: host, tempWellBeingData: bitstring; inj-event(endD
 query dapp: host, ipfs: host, ipfsNonce: nonce, qmHash: bitstring; inj-event(endDataFetchFromIpfsPartial(dapp, ipfs, ipfsNonce, qmHash)) ==> inj-event(beginDataFetchFromIpfsPartial(dapp, ipfs, ipfsNonce, qmHash)).
 query dapp: host, ipfs: host, ipfsNonce: nonce, encWellB: bitstring, encWellBHashed: bitstring; inj-event(endDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)) ==> inj-event(beginDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)).
 
+query owner: host, requester: host, sharingNonce: nonce, sharingToken: bitstring, 
+      dapp: host, ipfs: host, ipfsNonce: nonce, encWellB: bitstring, tempWellBeing: bitstring, 
+      encWellBHashed: bitstring; event(endDataReadByRequester(owner, requester, tempWellBeing)) ==> inj-event(endDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)) && 
+                                                                                                    inj-event(endDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)).
+
 
 
 (* U1 process *)
