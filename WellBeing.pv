@@ -42,7 +42,11 @@ not attacker(new skI).
 (* Honest host names U1, U2, S, I *)
 
 free U1, U2, S, I: host [private].
+
+(* Secret declaration *)
+
 free wellBeingData, tokenU1U2, metaData, tempWellBeing : bitstring [private].
+
 query attacker(wellBeingData);
       attacker(tempWellBeing);
       attacker(tokenU1U2).
@@ -58,11 +62,14 @@ event beginDataSharingRequestFull(host, host, nonce, bitstring).
 event endDataSharingRequestFull(host, host, nonce, bitstring).
 event beginIpfDataRetrieveFromDapp(host, host, nonce, bitstring).
 event endIpfDataRetrieveFromDapp(host, host, nonce, bitstring).
+event beginSendTokentoDapp(host, host, nonce, bitstring).
+event endSendTokentoDapp(host, host, nonce, bitstring).
 
 query owner: host, ipfs: host, meta: bitstring; inj-event(endMetadataUpload(owner,ipfs, meta)) ==> inj-event(beginMetadataUpload(owner,ipfs, meta)).
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce; inj-event(endDataSharingRequestPartial(owner, requester, sharingNonce, meta)) ==> inj-event(beginDataSharingRequestPartial(owner,requester, sharingNonce, meta)).
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce, sharingToken: bitstring; inj-event(endDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)) ==> inj-event(beginDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)).
 query owner: host, requester: host, sharingNonce: nonce, encWellBeingData: bitstring; inj-event(endIpfDataRetrieveFromDapp(owner, requester, sharingNonce, encWellBeingData)) ==> inj-event(beginIpfDataRetrieveFromDapp(owner, requester, sharingNonce, encWellBeingData)).
+query owner: host, requester: host, sharingToken: bitstring, sharingNonce: nonce; inj-event(endSendTokentoDapp(owner, requester, sharingNonce, sharingToken)) ==> inj-event(beginSendTokentoDapp(owner, requester, sharingNonce, sharingToken)).
 
 (* U1 process *)
 
@@ -161,6 +168,7 @@ let processU2(skU2: skey, pkS: pkey, pkU1: pkey) =
     
     (* M12 *)
     new N8: nonce;
+    event beginSendTokentoDapp(xU1, U2, N8, tokenU1U2);
     out(c, (encrypt((nonce_to_bitstring(N8), tokenU1U2, host_to_bitstring(U2)), pkS), (sign(hash((nonce_to_bitstring(N8), tokenU1U2, host_to_bitstring(U2))), skU2))));
 
     (* M13 *)
@@ -252,7 +260,9 @@ let processS(skS: skey, pkU1: pkey, pkU2: pkey, pkI: pkey) =
     if(hash((xN8Mes, tokenU1U2))=signedHashTokenU2) && (u2AsStringSign = hostU2AsString) then
 
    (* M13 *) 
-    out(c, (encrypt((xN8Mes, encTempMetadataSign, encHashTempDataSign), pkU2), sign(hash((xN8Mes, encTempMetadataSign, encHashTempDataSign)), skS))).
+    out(c, (encrypt((xN8Mes, encTempMetadataSign, encHashTempDataSign), pkU2), sign(hash((xN8Mes, encTempMetadataSign, encHashTempDataSign)), skS)));
+    event endSendTokentoDapp(U1, U2, bitstring_to_nonce(xN8Mes), tokenU1U2);
+    0.
 
 
 process 
