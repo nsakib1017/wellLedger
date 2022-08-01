@@ -54,9 +54,12 @@ event beginMetadataUpload(host, host, bitstring).
 event endMetadataUpload(host, host, bitstring).
 event beginDataSharingRequestPartial(host, host, nonce, bitstring).
 event endDataSharingRequestPartial(host, host, nonce, bitstring).
+event beginDataSharingRequestFull(host, host, nonce, bitstring).
+event endDataSharingRequestFull(host, host, nonce, bitstring).
 
-query owner: host, ipfs: host, meta:bitstring; inj-event(endMetadataUpload(owner,ipfs, meta)) ==> inj-event(beginMetadataUpload(owner,ipfs, meta)).
+query owner: host, ipfs: host, meta: bitstring; inj-event(endMetadataUpload(owner,ipfs, meta)) ==> inj-event(beginMetadataUpload(owner,ipfs, meta)).
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce; inj-event(endDataSharingRequestPartial(owner, requester, sharingNonce, meta)) ==> inj-event(beginDataSharingRequestPartial(owner,requester, sharingNonce, meta)).
+query owner: host, requester: host, meta: bitstring, sharingNonce: nonce, sharingToken: bitstring; inj-event(endDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)) ==> inj-event(beginDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)).
 
 (* U1 process *)
 
@@ -104,6 +107,7 @@ let processU1(skU1: skey, pkS: pkey, pkU2: pkey) =
     
     (* M11 *)
     event endDataSharingRequestPartial(U1, xU2, bitstring_to_nonce(encN4), metaData);
+    event beginDataSharingRequestFull(U1, xU2, bitstring_to_nonce(encN4), tokenU1U2);
     out (c, 
             (
                 encrypt((encN4, tokenU1U2), pkU2), 
@@ -149,6 +153,7 @@ let processU2(skU2: skey, pkS: pkey, pkU1: pkey) =
     let(xN4enc: bitstring, =tokenU1U2) = decrypt(xU1EncRes, skU2) in
     if hashOfM11=hash((xN4enc, tokenU1U2)) then 
     if xN4enc = nonce_to_bitstring(N4) then
+    event endDataSharingRequestFull(xU1, U2, bitstring_to_nonce(xN4enc), tokenU1U2);
     
     (* M12 *)
     new N8: nonce;
