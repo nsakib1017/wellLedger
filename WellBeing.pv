@@ -1,7 +1,7 @@
 (* 
 
 WellBeing Data sharing protocol
-
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 M1  | U1 -> I  : (A, B)
 M2  | I  -> S  : { pkB, B }skS
 M3  | U2 -> S  : { Na, A }pkB
@@ -15,6 +15,7 @@ M10 | U1 -> S  : { Na, A }pkB
 M11 | U1 -> U2 : (B, A)
 M12 | U2 -> S  : { pkA, A }skS
 M13 | S  -> U2 : { Na, Nb }pkA
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 *)
 
