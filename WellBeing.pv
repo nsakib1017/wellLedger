@@ -24,6 +24,7 @@ Id'_M = { {M}_pkU1, H(M)skU1 }, A = { {M'}_pkU2, H(M')skU1 }
 
 
 set ignoreTypes = false.
+(* set traceDisplay = long. *)
 
 free c: channel.
 
@@ -81,8 +82,8 @@ query attacker(wellBeingData);
 
 
 (* Event declarations *)
-event beginMetadataUpload(host, host, nonce, bitstring).
-event endMetadataUpload(host, host, nonce, bitstring).
+event beginMetadataUpload(host, host, bitstring).
+event endMetadataUpload(host, host, bitstring).
 event beginDataSharingRequestPartial(host, host, nonce, bitstring).
 event endDataSharingRequestPartial(host, host, nonce, bitstring).
 event beginDataSharingRequestFull(host, host, nonce, bitstring).
@@ -99,14 +100,39 @@ event beginDataFetchFromIpfsFull(host, host, nonce, bitstring, bitstring).
 event endDataFetchFromIpfsFull(host, host, nonce, bitstring, bitstring).
 
 (* Event queries *)
-query owner: host, ipfs: host, dataUpNonce: nonce, meta: bitstring; inj-event(endMetadataUpload(owner, ipfs, dataUpNonce, meta)) ==> inj-event(beginMetadataUpload(owner, ipfs, dataUpNonce, meta)).
+query owner: host, ipfs: host, dataUpNonce: bitstring, meta: bitstring; event(beginMetadataUpload(owner, ipfs, meta)).
+query owner: host, ipfs: host, dataUpNonce: bitstring, meta: bitstring; event(endMetadataUpload(owner, ipfs, meta)).
+
+(* query owner: host, requester: host, meta: bitstring, sharingNonce: nonce; event(endDataSharingRequestPartial(owner, requester, sharingNonce, meta)).
+query owner: host, requester: host, meta: bitstring, sharingNonce: nonce; event(beginDataSharingRequestPartial(owner,requester, sharingNonce, meta)).
+
+query owner: host, requester: host, meta: bitstring, sharingNonce: nonce, sharingToken: bitstring; event(beginDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)).
+query owner: host, requester: host, meta: bitstring, sharingNonce: nonce, sharingToken: bitstring; event(endDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)).
+
+query owner: host, requester: host, sharingNonce: nonce, encWellBeingData: bitstring; event(beginIpfDataRetrieveFromDapp(owner, requester, sharingNonce, encWellBeingData)).
+query owner: host, requester: host, sharingNonce: nonce, encWellBeingData: bitstring; event(endIpfDataRetrieveFromDapp(owner, requester, sharingNonce, encWellBeingData)).
+
+query owner: host, requester: host, sharingToken: bitstring, sharingNonce: nonce; event(beginSendTokentoDapp(owner, requester, sharingNonce, sharingToken)).
+query owner: host, requester: host, sharingToken: bitstring, sharingNonce: nonce; event(endSendTokentoDapp(owner, requester, sharingNonce, sharingToken)).
+
+query owner: host, requester: host, tempWellBeingData: bitstring; event(beginDataReadByRequester(owner, requester, tempWellBeingData)).
+query owner: host, requester: host, tempWellBeingData: bitstring; event(endDataReadByRequester(owner, requester, tempWellBeingData)).
+
+query dapp: host, ipfs: host, ipfsNonce: nonce, qmHash: bitstring; event(beginDataFetchFromIpfsPartial(dapp, ipfs, ipfsNonce, qmHash)).
+query dapp: host, ipfs: host, ipfsNonce: nonce, qmHash: bitstring; event(endDataFetchFromIpfsPartial(dapp, ipfs, ipfsNonce, qmHash)).
+
+query dapp: host, ipfs: host, ipfsNonce: nonce, encWellB: bitstring, encWellBHashed: bitstring; event(beginDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)).
+query dapp: host, ipfs: host, ipfsNonce: nonce, encWellB: bitstring, encWellBHashed: bitstring; event(endDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)).
+
+query owner: host, ipfs: host, dataUpNonce: nonce, meta: bitstring; event(endMetadataUpload(owner, ipfs, dataUpNonce, meta)) ==> event(beginMetadataUpload(owner, ipfs, dataUpNonce, meta)).
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce; inj-event(endDataSharingRequestPartial(owner, requester, sharingNonce, meta)) ==> inj-event(beginDataSharingRequestPartial(owner,requester, sharingNonce, meta)).
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce, sharingToken: bitstring; inj-event(endDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)) ==> inj-event(beginDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)).
 query owner: host, requester: host, sharingNonce: nonce, encWellBeingData: bitstring; inj-event(endIpfDataRetrieveFromDapp(owner, requester, sharingNonce, encWellBeingData)) ==> inj-event(beginIpfDataRetrieveFromDapp(owner, requester, sharingNonce, encWellBeingData)).
 query owner: host, requester: host, sharingToken: bitstring, sharingNonce: nonce; inj-event(endSendTokentoDapp(owner, requester, sharingNonce, sharingToken)) ==> inj-event(beginSendTokentoDapp(owner, requester, sharingNonce, sharingToken)).
 query owner: host, requester: host, tempWellBeingData: bitstring; inj-event(endDataReadByRequester(owner, requester, tempWellBeingData)) ==> inj-event(beginDataReadByRequester(owner, requester, tempWellBeingData)).
 query dapp: host, ipfs: host, ipfsNonce: nonce, qmHash: bitstring; inj-event(endDataFetchFromIpfsPartial(dapp, ipfs, ipfsNonce, qmHash)) ==> inj-event(beginDataFetchFromIpfsPartial(dapp, ipfs, ipfsNonce, qmHash)).
-query dapp: host, ipfs: host, ipfsNonce: nonce, encWellB: bitstring, encWellBHashed: bitstring; inj-event(endDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)) ==> inj-event(beginDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)).
+query dapp: host, ipfs: host, ipfsNonce: nonce, encWellB: bitstring, encWellBHashed: bitstring; inj-event(endDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)) ==> inj-event(beginDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)). *)
+
 
 query owner: host, requester: host, sharingNonce: nonce, sharingToken: bitstring, 
       dapp: host, ipfs: host, ipfsNonce: nonce, encWellB: bitstring, tempWellBeing: bitstring, 
@@ -129,7 +155,7 @@ let processU1(skU1: skey, pkS: pkey, pkU2: pkey, pkI: pkey) =
     (* M1 *)
     if xI = I then 
     new N1: nonce;
-    event beginMetadataUpload(U1, xI, N1, metaData);
+    event beginMetadataUpload(U1,xI, metaData);
     out (c,  
             (
                 encrypt((host_to_bitstring(U1), nonce_to_bitstring(N1), metaData, encrypt(wellBeingData, pkU1), sign(hash(wellBeingData), skU1)), pkI),
@@ -167,6 +193,7 @@ let processU1(skU1: skey, pkS: pkey, pkU2: pkey, pkI: pkey) =
         );
     let(signedHashedWellBeing: bitstring) = checksign(recSignHashedWellBeing, pkS) in
     let(xN5Enc: bitstring, xEncWellbeing: bitstring, xSignedHashedWellBeing: bitstring) = decrypt(recEncMetaData, skU1) in
+    event beginDataReadByRequester(U1, U2, tempWellBeing);
     if (hash((xN5Enc, xEncWellbeing, xSignedHashedWellBeing))=signedHashedWellBeing) then
     if nonce_to_bitstring(N5) = xN5Enc then
     let (=wellBeingData) = decrypt(xEncWellbeing, skU1) in
@@ -176,7 +203,6 @@ let processU1(skU1: skey, pkS: pkey, pkU2: pkey, pkI: pkey) =
     (* M10 *)
     new tc: bitstring;
     new N7: nonce;
-    event beginDataReadByRequester(U1, U2, tempWellBeing);
     out (c, 
             (   nonce_to_bitstring(N7),
                 encrypt((tokenU1U2, encrypt(tempWellBeing, pkU2), sign(hash(tempWellBeing), skU1), host_to_bitstring(U2), tc), pkS),
@@ -228,10 +254,10 @@ let processU2(skU2: skey, pkS: pkey, pkU1: pkey) =
     let (hashU1Metadata: bitstring) = checksign(signedIdMeta, pkS) in
     let (xEncN3:bitstring, u1SignString: bitstring, =metaData) = decrypt(encIdMeta, skU2) in
 
-    if (hash((xEncN3, u1SignString, metaData)) = hashU1Metadata) then
-    if nonce_to_bitstring(N3) = xEncN3 then
+    (* if (hash((xEncN3, u1SignString, metaData)) = hashU1Metadata) then
+    if nonce_to_bitstring(N3) = xEncN3 then *)
     let (xHostU1) = bitstring_to_host(u1SignString) in
-    if xHostU1=U1 then
+    (* if xHostU1=U1 then *)
 
     (* M5 *)
     new N4: nonce;
@@ -252,8 +278,8 @@ let processU2(skU2: skey, pkS: pkey, pkU1: pkey) =
         );
     let (hashOfM11: bitstring) = checksign(xU1SignRes, pkU1) in
     let (xN4enc: bitstring, =tokenU1U2) = decrypt(xU1EncRes, skU2) in
-    if hashOfM11=hash((xN4enc, tokenU1U2)) then 
-    if xN4enc = nonce_to_bitstring(N4) then
+    (* if hashOfM11=hash((xN4enc, tokenU1U2)) then 
+    if xN4enc = nonce_to_bitstring(N4) then *)
     event endDataSharingRequestFull(xU1, U2, bitstring_to_nonce(xN4enc), tokenU1U2);
     
     (* M12 *)
@@ -276,11 +302,10 @@ let processU2(skU2: skey, pkS: pkey, pkU1: pkey) =
     let (tempDataHashFromSign: bitstring ) = checksign(serverResSign, pkS) in
     let (xN8Mes: bitstring, tempDataEncFromMes: bitstring, tempDataHashFromMes: bitstring ) = decrypt(serverResEnc, skU2) in
 
-    if (tempDataHashFromSign = hash((xN8Mes, tempDataEncFromMes, tempDataHashFromMes))) then
+    if (tempDataHashFromSign = hash((xN8Mes, tempDataEncFromMes, tempDataHashFromMes))) then event endDataReadByRequester(U1, U2, tempWellBeing);
     if (xN8Mes = nonce_to_bitstring(N8)) then
     let (=tempWellBeing) = decrypt(tempDataEncFromMes, skU2) in
     if hash(tempWellBeing) = tempDataHashFromMes then
-    event endDataReadByRequester(U1, U2, tempWellBeing);
     0.
 
 
@@ -298,7 +323,7 @@ let processI(pkS: pkey, skI: skey, pkU1: pkey) =
     let (xU1AsString: bitstring, xN1String: bitstring, =metaData, encWellbeing: bitstring, hashedWellBeingSigned: bitstring) = decrypt(metaDataFromU1Enc, skI) in
     let (metaDecFromU1Sign: bitstring) = checksign(metaDataFromU1Sign, pkU1) in
     if (metaDecFromU1Sign = hash((xU1AsString, xN1String, metaData, encWellbeing, hashedWellBeingSigned))) then
-	if bitstring_to_host(xU1AsString) = U1 then
+	if xU1AsString = host_to_bitstring(U1) then
     let pkI = pk(skI) in
     
     (* M2 *)
@@ -309,7 +334,7 @@ let processI(pkS: pkey, skI: skey, pkU1: pkey) =
                 nonce_to_bitstring(N2), bitstring_to_host(xU1AsString), metaData, qmHashData
             )
         );
-    event endMetadataUpload(bitstring_to_host(xU1AsString), I, bitstring_to_nonce(xN1String), metaData);
+    event endMetadataUpload(bitstring_to_host(xU1AsString), I, metaData);
 
     (* M7 *)
     in (c, 
@@ -450,7 +475,7 @@ let processS(skS: skey, pkU1: pkey, pkU2: pkey, pkI: pkey) =
 process 
     new skU1: skey; 
 	let pkU1 = pk(skU1) in
-        out(c, pkU1);
+        (* out(c, pkU1); *)
     new skU2: skey; 
 	let pkU2 = pk(skU2) in
         out(c, pkU2);
