@@ -133,7 +133,7 @@ query dapp: host, ipfs: host, ipfsNonce: nonce, encWellB: bitstring, encWellBHas
 
 
 query owner: host, ipfs: host, dataUpNonce: nonce, meta: bitstring; inj-event(endMetadataUpload(owner, ipfs, dataUpNonce, meta)) ==> inj-event(beginMetadataUpload(owner, ipfs, dataUpNonce, meta)).
-(* query owner: host, requester: host, tempWellBeingData: bitstring; inj-event(endDataReadByRequester(owner, requester, tempWellBeingData)) ==> inj-event(beginDataReadByRequester(owner, requester, tempWellBeingData)). *)
+query owner: host, requester: host, tempWellBeingData: bitstring; inj-event(endDataReadByRequester(owner, requester, tempWellBeingData)) ==> inj-event(beginDataReadByRequester(owner, requester, tempWellBeingData)).
 
 (* query owner: host, ipfs: host, dataUpNonce: nonce, meta: bitstring; inj-event(endMetadataUpload(owner, ipfs, dataUpNonce, meta)) ==> inj-event(beginMetadataUpload(owner, ipfs, dataUpNonce, meta)).
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce; inj-event(endDataSharingRequestPartial(owner, requester, sharingNonce, meta)) ==> inj-event(beginDataSharingRequestPartial(owner,requester, sharingNonce, meta)).
@@ -326,8 +326,8 @@ let processI(pkS: pkey, skI: skey, pkU1: pkey) =
         );
     let (xU1AsString: bitstring, xN1String: bitstring, =metaData, encWellbeing: bitstring, hashedWellBeingSigned: bitstring) = decrypt(metaDataFromU1Enc, skI) in
     let (metaDecFromU1Sign: bitstring) = checksign(metaDataFromU1Sign, pkU1) in
-    if (metaDecFromU1Sign = hash((xU1AsString, xN1String, metaData, encWellbeing, hashedWellBeingSigned))) then event endMetadataUpload(bitstring_to_host(xU1AsString), I, bitstring_to_nonce(xN1String), metaData);
-	if xU1AsString = host_to_bitstring(U1) then
+    if (metaDecFromU1Sign = hash((xU1AsString, xN1String, metaData, encWellbeing, hashedWellBeingSigned))) then
+	if xU1AsString = host_to_bitstring(U1) then event endMetadataUpload(bitstring_to_host(xU1AsString), I, bitstring_to_nonce(xN1String), metaData);
     let pkI = pk(skI) in
     
     (* M2 *)
