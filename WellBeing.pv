@@ -60,19 +60,18 @@ fun hash(bitstring): bitstring.
 fun qmhash(bitstring): bitstring.
 
 
-(* Secrecy assumptions *)
-
-(* Tags *)
-
+(* Secret keys *)
 const skU1:skey [private].
 const skU2:skey [private].
 const skS:skey [private].
 const skI:skey [private].
+
+
+(* Secrecy assumptions *)
 not attacker(skU1).
 not attacker(skU2).
 not attacker(skS).
 not attacker(skI).
-
 
 
 (* Honest host names U1, U2, S, I *)
@@ -108,15 +107,10 @@ event beginDataFetchFromIpfsFull(host, host, nonce, bitstring, bitstring).
 event endDataFetchFromIpfsFull(host, host, nonce, bitstring, bitstring).
 
 (* Event queries *)
-query owner: host, ipfs: host, dataUpNonce: nonce, meta: bitstring; event(beginMetadataUpload(owner,ipfs,dataUpNonce,meta)).
-query owner: host, ipfs: host, dataUpNonce: nonce, meta: bitstring; event(endMetadataUpload(owner,ipfs,dataUpNonce,meta)).
-query owner: host, requester: host, meta: bitstring, sharingNonce: nonce; event(beginDataSharingRequestPartial(owner,requester, sharingNonce, meta)).
-query dapp: host, ipfs: host, ipfsNonce: nonce, qmHash: bitstring; event(beginDataFetchFromIpfsPartial(dapp, ipfs, ipfsNonce, qmHash)).
-query owner: host, requester: host, sharingNonce: nonce, encWellBeingData: bitstring; event(beginIpfDataRetrieveFromDapp(owner, requester, sharingNonce, encWellBeingData)).
-query dapp: host, ipfs: host, ipfsNonce: nonce, encWellB: bitstring, encWellBHashed: bitstring; event(endDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)).
-query dapp: host, ipfs: host, ipfsNonce: nonce, encWellB: bitstring, encWellBHashed: bitstring; event(beginDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)).
+query owner: host, ipfs: host, dataUpNonce: nonce, meta: bitstring; event(beginMetadataUpload(owner, ipfs, dataUpNonce, meta)).
+query owner: host, ipfs: host, dataUpNonce: nonce, meta: bitstring; inj-event(endMetadataUpload(owner, ipfs, dataUpNonce, meta)).
 
-(* query owner: host, requester: host, meta: bitstring, sharingNonce: nonce; event(endDataSharingRequestPartial(owner, requester, sharingNonce, meta)).
+query owner: host, requester: host, meta: bitstring, sharingNonce: nonce; event(endDataSharingRequestPartial(owner, requester, sharingNonce, meta)).
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce; event(beginDataSharingRequestPartial(owner,requester, sharingNonce, meta)).
 
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce, sharingToken: bitstring; event(beginDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)).
@@ -137,16 +131,16 @@ query dapp: host, ipfs: host, ipfsNonce: nonce, qmHash: bitstring; event(endData
 query dapp: host, ipfs: host, ipfsNonce: nonce, encWellB: bitstring, encWellBHashed: bitstring; event(beginDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)).
 query dapp: host, ipfs: host, ipfsNonce: nonce, encWellB: bitstring, encWellBHashed: bitstring; event(endDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)).
 
+
+query owner: host, requester: host, tempWellBeingData: bitstring; inj-event(endDataReadByRequester(owner, requester, tempWellBeingData)) ==> inj-event(beginDataReadByRequester(owner, requester, tempWellBeingData)).
+
+(* query owner: host, ipfs: host, dataUpNonce: nonce, meta: bitstring; inj-event(endMetadataUpload(owner, ipfs, dataUpNonce, meta)) ==> inj-event(beginMetadataUpload(owner, ipfs, dataUpNonce, meta)).
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce; inj-event(endDataSharingRequestPartial(owner, requester, sharingNonce, meta)) ==> inj-event(beginDataSharingRequestPartial(owner,requester, sharingNonce, meta)).
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce, sharingToken: bitstring; inj-event(endDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)) ==> inj-event(beginDataSharingRequestFull(owner, requester, sharingNonce, sharingToken)).
 query owner: host, requester: host, sharingNonce: nonce, encWellBeingData: bitstring; inj-event(endIpfDataRetrieveFromDapp(owner, requester, sharingNonce, encWellBeingData)) ==> inj-event(beginIpfDataRetrieveFromDapp(owner, requester, sharingNonce, encWellBeingData)).
 query owner: host, requester: host, sharingToken: bitstring, sharingNonce: nonce; inj-event(endSendTokentoDapp(owner, requester, sharingNonce, sharingToken)) ==> inj-event(beginSendTokentoDapp(owner, requester, sharingNonce, sharingToken)).
-query owner: host, requester: host, tempWellBeingData: bitstring; inj-event(endDataReadByRequester(owner, requester, tempWellBeingData)) ==> inj-event(beginDataReadByRequester(owner, requester, tempWellBeingData)).
 query dapp: host, ipfs: host, ipfsNonce: nonce, qmHash: bitstring; inj-event(endDataFetchFromIpfsPartial(dapp, ipfs, ipfsNonce, qmHash)) ==> inj-event(beginDataFetchFromIpfsPartial(dapp, ipfs, ipfsNonce, qmHash)).
 query dapp: host, ipfs: host, ipfsNonce: nonce, encWellB: bitstring, encWellBHashed: bitstring; inj-event(endDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)) ==> inj-event(beginDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)). *)
-
-
-(* query owner: host, ipfs: host, dataUpNonce: nonce, meta: bitstring; inj-event(endMetadataUpload(meta)) ==> inj-event(beginMetadataUpload(meta)). *)
 
 
 (* U1 process *)
@@ -220,14 +214,14 @@ let processU1(skU1: skey, pkS: pkey, pkU2: pkey, pkI: pkey) =
         );
     
     (* M11 *)
-    event endDataSharingRequestPartial(U1, xU2, bitstring_to_nonce(encN4), metaData);
-    event beginDataSharingRequestFull(U1, xU2, bitstring_to_nonce(encN4), tokenU1U2);
     out (c, 
             (
                 encrypt((encN4, tokenU1U2), pkU2), 
                 sign(hash((encN4, tokenU1U2)), skU1)
             )
         );
+    event endDataSharingRequestPartial(U1, xU2, bitstring_to_nonce(encN4), metaData);
+    event beginDataSharingRequestFull(U1, xU2, bitstring_to_nonce(encN4), tokenU1U2);
     0.
 
 
@@ -310,10 +304,11 @@ let processU2(skU2: skey, pkS: pkey, pkU1: pkey) =
     let (tempDataHashFromSign: bitstring ) = checksign(serverResSign, pkS) in
     let (xN8Mes: bitstring, tempDataEncFromMes: bitstring, tempDataHashFromMes: bitstring ) = decrypt(serverResEnc, skU2) in
 
-    if (tempDataHashFromSign = hash((xN8Mes, tempDataEncFromMes, tempDataHashFromMes))) then event endDataReadByRequester(U1, U2, tempWellBeing);
+    if (tempDataHashFromSign = hash((xN8Mes, tempDataEncFromMes, tempDataHashFromMes))) then
     if (xN8Mes = nonce_to_bitstring(N8)) then
     let (=tempWellBeing) = decrypt(tempDataEncFromMes, skU2) in
-    if hash(tempWellBeing) = tempDataHashFromMes then
+    let (decTempDataSigned: bitstring) = checksign(tempDataHashFromMes, pkU1) in
+    if decTempDataSigned = hash(tempWellBeing) then event endDataReadByRequester(U1, U2, tempWellBeing);
     0.
 
 
@@ -436,7 +431,7 @@ let processS(skS: skey, pkU1: pkey, pkU2: pkey, pkI: pkey) =
     event endDataFetchFromIpfsFull(S, I, bitstring_to_nonce(xN6Enc), encWellBeing, encWellBeingHashed);
     if signWellBeingHashed=hash((xN6Enc, encWellBeing, encWellBeingHashed)) then
     if xN6Enc = nonce_to_bitstring(N6) then
-    
+
     (* M9 *) 
     event endIpfDataRetrieveFromDapp(U1, U2, bitstring_to_nonce(xN5Enc), encWellBeing);
     out (c, 
@@ -455,8 +450,8 @@ let processS(skS: skey, pkU1: pkey, pkU2: pkey, pkI: pkey) =
             )
         );
     let(hashTokenEncData: bitstring) = checksign(tokenU1U2Sign, pkU1) in
-    let(=tokenU1U2, encTempMetadataSign: bitstring, encHashTempDataSign: bitstring, u2AsStringSign: bitstring, tcSign: bitstring) = decrypt(tokenU1U2Sign, skS) in
-    if(hash((tokenU1U2, encTempMetadataSign, encHashTempDataSign, u2AsStringSign, tcSign)) = hashTokenEncData) then
+    let(=tokenU1U2, encTempMetadataSign: bitstring, encHashTempDataSign: bitstring, u2AsStringSign: bitstring, tcSign: bitstring) = decrypt(tokenU1U2Enc, skS) in  
+    if(hashTokenEncData=hash((tokenU1U2, encTempMetadataSign, encHashTempDataSign, u2AsStringSign, tcSign))) then
     
     (* M12 *) 
     in (c, 
@@ -465,9 +460,9 @@ let processS(skS: skey, pkU1: pkey, pkU2: pkey, pkI: pkey) =
                 tokenSentByU2Sign: bitstring
             )
         );
-    let(signedHashTokenU2: bitstring) = checksign(tokenSentByU2Sign, pkU2) in
     let(xN8Mes: bitstring, =tokenU1U2, hostU2AsString: bitstring) = decrypt(tokenSentByU2Enc, skS) in
-    if(hash((xN8Mes, tokenU1U2))=signedHashTokenU2) && (u2AsStringSign = hostU2AsString) then
+    let(signedHashTokenU2: bitstring) = checksign(tokenSentByU2Sign, pkU2) in
+    if(signedHashTokenU2=hash((xN8Mes, tokenU1U2, hostU2AsString))) && (u2AsStringSign = hostU2AsString) then
 
    (* M13 *) 
     out (c, 
