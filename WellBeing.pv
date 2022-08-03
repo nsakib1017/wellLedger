@@ -107,8 +107,8 @@ event beginDataFetchFromIpfsFull(host, host, nonce, bitstring, bitstring).
 event endDataFetchFromIpfsFull(host, host, nonce, bitstring, bitstring).
 
 (* Event queries *)
-query owner: host, ipfs: host, dataUpNonce: nonce, meta: bitstring; event(beginMetadataUpload(owner, ipfs, dataUpNonce, meta)).
 query owner: host, ipfs: host, dataUpNonce: nonce, meta: bitstring; inj-event(endMetadataUpload(owner, ipfs, dataUpNonce, meta)).
+query owner: host, ipfs: host, dataUpNonce: nonce, meta: bitstring; event(beginMetadataUpload(owner, ipfs, dataUpNonce, meta)).
 
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce; event(endDataSharingRequestPartial(owner, requester, sharingNonce, meta)).
 query owner: host, requester: host, meta: bitstring, sharingNonce: nonce; event(beginDataSharingRequestPartial(owner,requester, sharingNonce, meta)).
@@ -132,6 +132,7 @@ query dapp: host, ipfs: host, ipfsNonce: nonce, encWellB: bitstring, encWellBHas
 query dapp: host, ipfs: host, ipfsNonce: nonce, encWellB: bitstring, encWellBHashed: bitstring; event(endDataFetchFromIpfsFull(dapp, ipfs, ipfsNonce, encWellB, encWellBHashed)).
 
 
+(* query owner: host, ipfs: host, dataUpNonce: nonce, meta: bitstring; inj-event(endMetadataUpload(owner, ipfs, dataUpNonce, meta)) ==> inj-event(beginMetadataUpload(owner, ipfs, dataUpNonce, meta)). *)
 query owner: host, requester: host, tempWellBeingData: bitstring; inj-event(endDataReadByRequester(owner, requester, tempWellBeingData)) ==> inj-event(beginDataReadByRequester(owner, requester, tempWellBeingData)).
 
 (* query owner: host, ipfs: host, dataUpNonce: nonce, meta: bitstring; inj-event(endMetadataUpload(owner, ipfs, dataUpNonce, meta)) ==> inj-event(beginMetadataUpload(owner, ipfs, dataUpNonce, meta)).
