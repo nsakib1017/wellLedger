@@ -1,24 +1,24 @@
 (* 
-
                 **** WellBeing Data sharing protocol ****
- _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-| M1  | U1 ->  I  | { N_1, U1, Id_M, Id'_M }_pkI, { H(N_1, Id_M, Id'_M) }_skU1            |
-| M2  | I  ->  S  | { N_2, U1, I, Id_M, QmH(Id'_M) }_pkS, { H(N_1, Id_M, Id'_M) }_skI     |                                 |
-| M3  | S  ->  I  | { N_2, U1, S }_pkI, { H(N_2, U1, S) }_skS                             |                           |
-| M4  | I  ->  U1 | { N_1, I, QmH(Id'_M) }_pkU1, { N_1, I, QmH(Id'_M) }_skI               |                                |
-| M5  | U2 ->  S  | { N_3, U1 }_pkS, { H(N_3, U1) }_skU2                                  |
-| M6  | S  ->  U2 | { N_3, U1, Id_M }_pkU2, { H(N_3, U1, Id_M) }_skS                      |
-| M7  | U2 ->  U1 | { N_4, Id_M }_pkU1, { H(N_4, Id_M) }_skU2,                            |
-| M8  | U1 ->  S  | { N_5, Id_M }_pkS, { H(N_5, Id_M) }_skU1,                             |
-| M9  | S  ->  I  | { N_6, QmH(Id'_M) }_pkI, { H(N_6, QmH(Id'_M)) }_skS                   |
-| M10 | I  ->  S  | { N_6, Id'_M }_pkS, { H(N_6, Id'_M) }_skI                             |
-| M11 | S  ->  U1 | { N_5, Id'_M }_pkU1, { H(N_5, Id'_M) }_skS                            |
-| M12 | U1 ->  S  | { N_7, {TknU1U2, A, U2, TC}_pkS, { H(TknU1U2, A, U2, TC) }_skU1 }     |
-| M13 | S ->  U1  | { N_7, {TknU1U2, U2}_pkS, { H(TknU1U2, U2) }_skU1 }     |
-| M14 | U1 ->  U2 | { N_4, TknU1U2}_pkU2, { H(N_4, TknU1U2) }_skU1                        |
-| M15 | U2 ->  S  | { N_8, TknU1U2}_pkS, { H(N_8, TknU1U2) }_skU2                         |
-| M16 | S  ->  U2 | { N_8, A}_pkU2, { H(N_8, A) }_skS                                     |
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+|                                                                                            |
+|    M1  | U1 ->  I  | { N_1, U1, Id_M, Id'_M }_pkI, { H(N_1, Id_M, Id'_M) }_skU1            |
+|    M2  | I  ->  S  | { N_2, U1, I, Id_M, QmH(Id'_M) }_pkS, { H(N_1, Id_M, Id'_M) }_skI     |                                 |
+|    M3  | S  ->  I  | { N_2, U1, S }_pkI, { H(N_2, U1, S) }_skS                             |                           |
+|    M4  | I  ->  U1 | { N_1, I, QmH(Id'_M) }_pkU1, { N_1, I, QmH(Id'_M) }_skI               |                                |
+|    M5  | U2 ->  S  | { N_3, U1 }_pkS, { H(N_3, U1) }_skU2                                  |
+|    M6  | S  ->  U2 | { N_3, U1, Id_M }_pkU2, { H(N_3, U1, Id_M) }_skS                      |
+|    M7  | U2 ->  U1 | { N_4, Id_M }_pkU1, { H(N_4, Id_M) }_skU2,                            |
+|    M8  | U1 ->  S  | { N_5, Id_M }_pkS, { H(N_5, Id_M) }_skU1,                             |
+|    M9  | S  ->  I  | { N_6, QmH(Id'_M) }_pkI, { H(N_6, QmH(Id'_M)) }_skS                   |
+|    M10 | I  ->  S  | { N_6, Id'_M }_pkS, { H(N_6, Id'_M) }_skI                             |
+|    M11 | S  ->  U1 | { N_5, Id'_M }_pkU1, { H(N_5, Id'_M) }_skS                            |
+|    M12 | U1 ->  S  | { N_7, {TknU1U2, A, U2, TC}_pkS, { H(TknU1U2, A, U2, TC) }_skU1 }     |
+|    M13 | S ->  U1  | { N_7, {TknU1U2, U2}_pkS, { H(TknU1U2, U2) }_skU1 }                   |
+|    M14 | U1 ->  U2 | { N_4, TknU1U2}_pkU2, { H(N_4, TknU1U2) }_skU1                        |
+|    M15 | U2 ->  S  | { N_8, TknU1U2}_pkS, { H(N_8, TknU1U2) }_skU2                         |
+|    M16 | S  ->  U2 | { N_8, A}_pkU2, { H(N_8, A) }_skS                                     |
+. _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _  .
 
 Id'_M = { {M}_pkU1, H(M)skU1 }, A = { {M'}_pkU2, H(M')skU1 }
 
