@@ -63,18 +63,11 @@ fun hash(bitstring): bitstring.
 fun qmhash(bitstring): bitstring.
 
 
-(* Secret keys *)
-const skU1:skey [private].
-const skU2:skey [private].
-const skS:skey [private].
-const skI:skey [private].
-
-
 (* Secrecy assumptions *)
-not attacker(skU1).
-not attacker(skU2).
-not attacker(skS).
-not attacker(skI).
+not attacker(new skU1).
+not attacker(new skU2).
+not attacker(new skS).
+not attacker(new skI).
 
 
 (* Honest host names U1, U2, S, I *)
@@ -484,12 +477,16 @@ let processS(skS: skey, pkU1: pkey, pkU2: pkey, pkI: pkey) =
 
 (* Main process setup *)
 process 
+    new skU1: skey;
 	let pkU1 = pk(skU1) in
         out(c, pkU1);
+    new skU2: skey;
 	let pkU2 = pk(skU2) in
         out(c, pkU2);
+    new skS: skey;
 	let pkS = pk(skS) in
 	    out(c, pkS);
+    new skI: skey;
 	let pkI = pk(skI) in
 	    out(c, pkI);
 	(
