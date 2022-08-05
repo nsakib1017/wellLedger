@@ -93,24 +93,39 @@ event beginDataReadByRequester(host, host, bitstring).
 event endDataReadByRequester(host, host, bitstring).
 event beginSendTokenTorequester(host, host, nonce, bitstring).
 event endSendTokenTorequester(host, host, nonce, bitstring).
+event beginRetriveDataFromIpfs(host, host, nonce, bitstring).
+event endRetriveDataFromIpfs(host, host, nonce, bitstring).
+event beginSendEncDataToRequester(host, host, nonce, bitstring).
+event endSendEncDataToRequester(host, host, nonce, bitstring).
+event beginFetchingDataQmHash(host, host, nonce, bitstring).
+event endFetchingDataQmHash(host, host, nonce, bitstring).
 
 
 (* Event execution queries *)
-query owner: host, ipfs: host, nonce: nonce, meta: bitstring; event(beginMetadataUpload(owner, ipfs, nonce, meta)).
-query owner: host, ipfs: host, nonce: nonce, meta: bitstring; event(endMetadataUpload(owner, ipfs, nonce, meta)).
+query owner: host, ipfs: host, upNonce: nonce, meta: bitstring; event(beginMetadataUpload(owner, ipfs, upNonce, meta)).
+query owner: host, ipfs: host, upNonce: nonce, meta: bitstring; event(endMetadataUpload(owner, ipfs, upNonce, meta)).
 query owner: host, requester: host, meta: bitstring, token: bitstring; event(endDataSharingRequest(owner, requester, token)).
 query requester: host, meta: bitstring, sharingNonce: nonce; event(beginDataSharingRequest(requester, meta)).
-query owner: host, requester: host, tempWellBeingData: bitstring; event(beginDataReadByRequester(owner, requester, tempWellBeingData)).
-query owner: host, requester: host, tempWellBeingData: bitstring; event(endDataReadByRequester(owner, requester, tempWellBeingData)).
 query owner: host, requester: host, tokenNonce: nonce, token: bitstring; event(beginSendTokenTorequester(owner, requester, tokenNonce, token)).
 query owner: host, requester: host, tokenNonce: nonce, token: bitstring; event(endSendTokenTorequester(owner, requester, tokenNonce, token)).
+query owner: host, requester: host, retriveNonce: nonce, meta: bitstring; event(beginRetriveDataFromIpfs(owner, requester, retriveNonce, meta)).
+query owner: host, requester: host, retriveNonce: nonce, meta: bitstring; event(endRetriveDataFromIpfs(owner, requester, retriveNonce, meta)).
+query ipfs: host, dappNonde: host, recData: nonce, qmHash: bitstring; event(beginFetchingDataQmHash(ipfs, dappNonde, recData, qmHash)).
+query ipfs: host, dappNonde: host, recData: nonce, qmHash: bitstring; event(endFetchingDataQmHash(ipfs, dappNonde, recData, qmHash)).
+query owner: host, requester: host, sendEncData: nonce, token: bitstring; event(beginSendEncDataToRequester(owner, requester, sendEncData, token)).
+query owner: host, requester: host, sendEncData: nonce, token: bitstring; event(endSendEncDataToRequester(owner, requester, sendEncData, token)).
+query owner: host, requester: host, tempWellBeingData: bitstring; event(beginDataReadByRequester(owner, requester, tempWellBeingData)).
+query owner: host, requester: host, tempWellBeingData: bitstring; event(endDataReadByRequester(owner, requester, tempWellBeingData)).
 
 
 (* Correspondence Queries *)
-query owner: host, ipfs: host, nonce: nonce, meta: bitstring; event(endMetadataUpload(owner, ipfs, nonce, meta)) ==> inj-event(beginMetadataUpload(owner, ipfs, nonce, meta)).
+query owner: host, ipfs: host, nonce: nonce, meta: bitstring; inj-event(endMetadataUpload(owner, ipfs, nonce, meta)) ==> inj-event(beginMetadataUpload(owner, ipfs, nonce, meta)).
 query owner: host, requester: host, meta: bitstring, token: bitstring; inj-event(endDataSharingRequest(owner, requester, token)) ==> inj-event(beginDataSharingRequest(requester, meta)).
 query owner: host, requester: host, tokenNonce: nonce, token: bitstring; inj-event(endSendTokenTorequester(owner, requester, tokenNonce, token)) ==> inj-event(beginSendTokenTorequester(owner, requester, tokenNonce, token)).
-query owner: host, requester: host, tempWellBeingData: bitstring; inj-event(endDataReadByRequester(owner, requester, tempWellBeingData)) ==> inj-event(beginDataReadByRequester(owner, requester, tempWellBeingData)).
+query owner: host, requester: host, retriveNonce: nonce, meta: bitstring; inj-event(endRetriveDataFromIpfs(owner, requester, retriveNonce, meta)) ==> inj-event(beginRetriveDataFromIpfs(owner, requester, retriveNonce, meta)).
+query owner: host, requester: host, sendEncData: nonce, token: bitstring; inj-event(endSendEncDataToRequester(owner, requester, sendEncData, token)) ==> inj-event(beginSendEncDataToRequester(owner, requester, sendEncData, token)).
+query ipfs: host, dappNonde: host, recData: nonce, qmHash: bitstring; inj-event(endFetchingDataQmHash(ipfs, dappNonde, recData, qmHash)) ==> inj-event(beginFetchingDataQmHash(ipfs, dappNonde, recData, qmHash)).
+query owner: host, requester: host, tempWellBeingData: bitstring; inj-event(endDataReadByRequester(owner, requester, tempWellBeingData)) ==> event(beginDataReadByRequester(owner, requester, tempWellBeingData)).
 
 (* U1 process *)
 let processU1(skU1: skey, pkS: pkey, pkU2: pkey, pkI: pkey) = 
@@ -178,6 +193,7 @@ let processU1(skU1: skey, pkS: pkey, pkU2: pkey, pkI: pkey) =
     let (=wellBeingData) = decrypt(xEncWellbeing, skU1) in
     let hashedWellbeing = checksign(xSignedHashedWellBeing, pkU1) in
     if hashedWellbeing = hash(wellBeingData) then
+    event endRetriveDataFromIpfs(U1, U2, N5, metaData);
     event beginDataReadByRequester(U1, U2, tempWellBeing);
     
     (* M12 *)
@@ -285,7 +301,7 @@ let processU2(skU2: skey, pkS: pkey, pkU1: pkey) =
         );
     let (sigM16: bitstring ) = checksign(encSigM16, pkS) in
     let (=N8, tempDataEncFromMes: bitstring, tempDataHashFromMes: bitstring, =S ) = decrypt(encM16, skU2) in
-    if sigM16 = hash((nonce_to_bitstring(N8), tempDataEncFromMes, tempDataHashFromMes, host_to_bitstring(S))) then
+    if sigM16 = hash((nonce_to_bitstring(N8), tempDataEncFromMes, tempDataHashFromMes, host_to_bitstring(S))) then event endSendEncDataToRequester(U1, U2, N8, tokenU1U2);
     let (=tempWellBeing) = decrypt(tempDataEncFromMes, skU2) in
     let (decTempDataSigned: bitstring) = checksign(tempDataHashFromMes, pkU1) in
     if decTempDataSigned = hash(tempWellBeing) then event endDataReadByRequester(U1, U2, tempWellBeing);
@@ -348,6 +364,7 @@ let processI(pkS: pkey, skI: skey, pkU1: pkey) =
     let (sigM9: bitstring) = checksign(encSigM9, pkS) in
     let (xN6: nonce, qmHashDataEnc: bitstring, =S, =U1, =U2) = decrypt(encM9, skI) in
     if (sigM9 = hash((nonce_to_bitstring(xN6), qmHashDataEnc, host_to_bitstring(S), host_to_bitstring(U1), host_to_bitstring(U2)))) then
+    event beginFetchingDataQmHash(I, S, xN6, qmHashDataEnc);
 
     (* M10 *)
     out (c, 
@@ -413,6 +430,7 @@ let processS(skS: skey, pkU1: pkey, pkU2: pkey, pkI: pkey) =
     let (sigM8: bitstring) = checksign(encSigM8, pkU1) in
     let (xN5: nonce, =metaData, =U1, =U2) = decrypt(encM8, skS) in
     if (sigM8 = hash((nonce_to_bitstring(xN5), metaData, host_to_bitstring(U1), host_to_bitstring(U2)))) then
+    event beginRetriveDataFromIpfs(U1, U2, xN5, metaData);
     
     (* M9 *) 
     new N6: nonce;
@@ -433,6 +451,7 @@ let processS(skS: skey, pkU1: pkey, pkU2: pkey, pkI: pkey) =
     let(sigM10: bitstring) = checksign(encSigM10, pkI) in
     let(=N6, encWellBeing: bitstring, encWellBeingHashed: bitstring, =I, =U1, =U2) = decrypt(encM10, skS) in
     if sigM10=hash((nonce_to_bitstring(N6), encWellBeing, encWellBeingHashed, host_to_bitstring(I), host_to_bitstring(U1), host_to_bitstring(U2))) then
+    event endFetchingDataQmHash(I, S, N6, xQmHashData);
 
     (* M11 *) 
     out (c, 
@@ -471,6 +490,7 @@ let processS(skS: skey, pkU1: pkey, pkU2: pkey, pkI: pkey) =
     let(xN8: nonce, =tokenU1U2, =U1, =U2) = decrypt(encM15, skS) in
     let(sigM15: bitstring) = checksign(encSigM15, pkU2) in
     if sigM15=hash((nonce_to_bitstring(xN8), tokenU1U2, host_to_bitstring(U1), host_to_bitstring(U2))) then
+    event beginSendEncDataToRequester(U1, U2, xN8, tokenU1U2);
 
    (* M16 *) 
     out (c, 
