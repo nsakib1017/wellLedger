@@ -1,5 +1,5 @@
 (* 
-                **** WellBeing Data sharing protocol ****
+                                **** WellBeing Data sharing protocol ****
  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __ _ _ _ _ _ 
 |                                                                                                       |
 |    M1  | U1 ->  I  | { N_1, U1, Id_M, Id'_M }_pkI, { H(N_1, Id_M, Id'_M) }_skU1                       |
@@ -91,7 +91,8 @@ event beginDataSharingRequest(host, bitstring).
 event endDataSharingRequest(host, host, bitstring).
 event beginDataReadByRequester(host, host, bitstring).
 event endDataReadByRequester(host, host, bitstring).
-
+event beginSendTokenTorequester(host, host, nonce, bitstring).
+event endSendTokenTorequester(host, host, nonce, bitstring).
 
 (* Event execution queries *)
 query owner: host, ipfs: host, nonce: nonce, meta: bitstring; event(beginMetadataUpload(owner, ipfs, nonce, meta)).
@@ -100,11 +101,14 @@ query owner: host, requester: host, meta: bitstring, token: bitstring; event(end
 query requester: host, meta: bitstring, sharingNonce: nonce; event(beginDataSharingRequest(requester, meta)).
 query owner: host, requester: host, tempWellBeingData: bitstring; event(beginDataReadByRequester(owner, requester, tempWellBeingData)).
 query owner: host, requester: host, tempWellBeingData: bitstring; event(endDataReadByRequester(owner, requester, tempWellBeingData)).
+query owner: host, requester: host, tokenNonce: nonce, token: bitstring; event(beginSendTokenTorequester(owner, requester, tokenNonce, token)).
+query owner: host, requester: host, tokenNonce: nonce, token: bitstring; event(endSendTokenTorequester(owner, requester, tokenNonce, token)).
 
 
 (* Correspondence Queries *)
 query owner: host, ipfs: host, nonce: nonce, meta: bitstring; event(endMetadataUpload(owner, ipfs, nonce, meta)) ==> inj-event(beginMetadataUpload(owner, ipfs, nonce, meta)).
 query owner: host, requester: host, meta: bitstring, token: bitstring; inj-event(endDataSharingRequest(owner, requester, token)) ==> inj-event(beginDataSharingRequest(requester, meta)).
+query owner: host, requester: host, tokenNonce: nonce, token: bitstring; inj-event(endSendTokenTorequester(owner, requester, tokenNonce, token)) ==> inj-event(beginSendTokenTorequester(owner, requester, tokenNonce, token)).
 query owner: host, requester: host, tempWellBeingData: bitstring; inj-event(endDataReadByRequester(owner, requester, tempWellBeingData)) ==> inj-event(beginDataReadByRequester(owner, requester, tempWellBeingData)).
 
 (* U1 process *)
@@ -195,6 +199,7 @@ let processU1(skU1: skey, pkS: pkey, pkU2: pkey, pkI: pkey) =
     let (=N7, =tokenU1U2, =S, =U2) = decrypt(encM13, skU1) in
     let (sigM13: bitstring) = checksign(encSigM13, pkS) in
     if sigM13 = hash((nonce_to_bitstring(N7), tokenU1U2, host_to_bitstring(S), host_to_bitstring(U2))) then
+    event beginSendTokenTorequester(U1, U2, xN4, tokenU1U2);
     
     (* M14 *)
     out (c, 
@@ -258,6 +263,7 @@ let processU2(skU2: skey, pkS: pkey, pkU1: pkey) =
     let (sigM14: bitstring) = checksign(encSigM14, pkU1) in
     let (=N4, =tokenU1U2, =U1) = decrypt(encM14, skU2) in
     if (sigM14=hash((nonce_to_bitstring(N4), tokenU1U2, host_to_bitstring(U1)))) then
+    event endSendTokenTorequester(U1, U2, N4, tokenU1U2);
     event endDataSharingRequest(U1, U2, tokenU1U2);
 
     (* M15 *)
