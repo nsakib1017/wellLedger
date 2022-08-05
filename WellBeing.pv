@@ -94,6 +94,7 @@ event endDataReadByRequester(host, host, bitstring).
 event beginSendTokenTorequester(host, host, nonce, bitstring).
 event endSendTokenTorequester(host, host, nonce, bitstring).
 
+
 (* Event execution queries *)
 query owner: host, ipfs: host, nonce: nonce, meta: bitstring; event(beginMetadataUpload(owner, ipfs, nonce, meta)).
 query owner: host, ipfs: host, nonce: nonce, meta: bitstring; event(endMetadataUpload(owner, ipfs, nonce, meta)).
