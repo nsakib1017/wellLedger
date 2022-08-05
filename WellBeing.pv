@@ -118,14 +118,19 @@ query owner: host, requester: host, tempWellBeingData: bitstring; event(beginDat
 query owner: host, requester: host, tempWellBeingData: bitstring; event(endDataReadByRequester(owner, requester, tempWellBeingData)).
 
 
-(* Correspondence Queries *)
+(* Correspondence Assertion Queries *)
 query owner: host, ipfs: host, nonce: nonce, meta: bitstring; inj-event(endMetadataUpload(owner, ipfs, nonce, meta)) ==> inj-event(beginMetadataUpload(owner, ipfs, nonce, meta)).
 query owner: host, requester: host, meta: bitstring, token: bitstring; inj-event(endDataSharingRequest(owner, requester, token)) ==> inj-event(beginDataSharingRequest(requester, meta)).
 query owner: host, requester: host, tokenNonce: nonce, token: bitstring; inj-event(endSendTokenTorequester(owner, requester, tokenNonce, token)) ==> inj-event(beginSendTokenTorequester(owner, requester, tokenNonce, token)).
 query owner: host, requester: host, retriveNonce: nonce, meta: bitstring; inj-event(endRetriveDataFromIpfs(owner, requester, retriveNonce, meta)) ==> inj-event(beginRetriveDataFromIpfs(owner, requester, retriveNonce, meta)).
 query owner: host, requester: host, sendEncData: nonce, token: bitstring; inj-event(endSendEncDataToRequester(owner, requester, sendEncData, token)) ==> inj-event(beginSendEncDataToRequester(owner, requester, sendEncData, token)).
 query ipfs: host, dappNonde: host, recData: nonce, qmHash: bitstring; inj-event(endFetchingDataQmHash(ipfs, dappNonde, recData, qmHash)) ==> inj-event(beginFetchingDataQmHash(ipfs, dappNonde, recData, qmHash)).
-query owner: host, requester: host, tempWellBeingData: bitstring; inj-event(endDataReadByRequester(owner, requester, tempWellBeingData)) ==> event(beginDataReadByRequester(owner, requester, tempWellBeingData)).
+query owner: host, requester: host, tempWellBeingData: bitstring; inj-event(endDataReadByRequester(owner, requester, tempWellBeingData)) ==> inj-event(beginDataReadByRequester(owner, requester, tempWellBeingData)).
+
+
+(* Complex Assertion Quries *)
+query owner: host, requester: host, meta: bitstring, token: bitstring, tempWellBeingData: bitstring, tokenNonce: nonce; 
+        inj-event(endDataReadByRequester(owner, requester, tempWellBeingData)) ==> (inj-event(endDataSharingRequest(owner, requester, token)) ==> inj-event (endSendTokenTorequester(owner, requester, tokenNonce, token))).
 
 (* U1 process *)
 let processU1(skU1: skey, pkS: pkey, pkU2: pkey, pkI: pkey) = 
